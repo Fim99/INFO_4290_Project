@@ -1,2 +1,2 @@
-# INFO_4290
+# INFO_4290_Project
 Meal Tracker Web App
