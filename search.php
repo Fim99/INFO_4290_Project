@@ -59,11 +59,12 @@ if (isset($_GET['query']))
             {
                 echo "<tr>";
                 // Make the description clickable
-                echo "<td><a href='product.php?fdcId=" . urlencode($food['fdcId']) . "'>" . htmlspecialchars($food['description']) . "</a></td>";
-                echo "<td>" . htmlspecialchars($food['fdcId']) . "</td>";
-                echo "<td>" . htmlspecialchars($food['foodCategory']) . "</td>";
-                echo "<td>" . htmlspecialchars($food['brandOwner']) . "</td>";
-                echo "<td>" . htmlspecialchars($food['brandName']) . "</td>";
+                echo "<td><a href='product.php?fdcId=" . urlencode($food['fdcId']) . "'>" . 
+                (empty($food['description']) ? "N/A" : htmlspecialchars($food['description'])) . "</a></td>";
+                echo "<td>" . (empty($food['fdcId']) ? "N/A" : htmlspecialchars($food['fdcId'])) . "</td>";
+                echo "<td>" . (empty($food['foodCategory']) ? "N/A" : htmlspecialchars($food['foodCategory'])) . "</td>";
+                echo "<td>" . (empty($food['brandOwner']) ? "N/A" : htmlspecialchars($food['brandOwner'])) . "</td>";
+                echo "<td>" . (empty($food['brandName']) ? "N/A" : htmlspecialchars($food['brandName'])) . "</td>";
                 echo "</tr>";
             }
             echo "</table>";
