@@ -10,7 +10,8 @@ if (isset($_GET['query']))
     $url = "https://api.nal.usda.gov/fdc/v1/foods/search?query=$query";
 
     // Check for additional parameters and append them to the URL if provided
-    $additionalParams = array(
+    $additionalParams = array
+    (
         'dataType' => isset($_GET['dataType']) ? urlencode($_GET['dataType']) : '',
         'pageSize' => isset($_GET['pageSize']) ? urlencode($_GET['pageSize']) : '',
         'pageNumber' => isset($_GET['pageNumber']) ? urlencode($_GET['pageNumber']) : '',
@@ -44,16 +45,37 @@ if (isset($_GET['query']))
         // Check if the response contains any food items
         if (isset($data['foods']) && !empty($data['foods']))
         {
+            // Display the results in a table
+            echo "<table class='table'>
+                    <tr>
+                        <th>Description</th>
+                        <th>FDC ID</th>
+                        <th>Food Category</th>
+                        <th>Brand Owner</th>
+                        <th>Brand</th>
+                    </tr>";
             // Iterate over each food item in the response
             foreach ($data['foods'] as $food)
             {
-                echo "<div>" . htmlspecialchars($food['description']) . "</div>";
+                echo "<tr>";
+                // Make the description clickable
+                echo "<td><a href='product.php?fdcId=" . urlencode($food['fdcId']) . "'>" . htmlspecialchars($food['description']) . "</a></td>";
+                echo "<td>" . htmlspecialchars($food['fdcId']) . "</td>";
+                echo "<td>" . htmlspecialchars($food['foodCategory']) . "</td>";
+                echo "<td>" . htmlspecialchars($food['brandOwner']) . "</td>";
+                echo "<td>" . htmlspecialchars($food['brandName']) . "</td>";
+                echo "</tr>";
             }
+            echo "</table>";
         }
         else
         {
             echo "No results found.";
         }
     }
+}
+else
+{
+    echo "No query specified.";
 }
 ?>
