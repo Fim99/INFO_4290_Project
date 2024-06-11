@@ -31,7 +31,7 @@ if (isset($_GET['fdcId']))
             echo "<p>FDC ID: " . htmlspecialchars($data['fdcId']) . "</p>";
             echo "<p>Data Type: " . htmlspecialchars($data['dataType']) . "</p>";
 
-            // Display nutrients in a table with col-md-2 width
+            // Display nutrients in a table
             if (isset($data['foodNutrients']) && is_array($data['foodNutrients']) && count($data['foodNutrients']) > 0)
             {
                 echo "<h2>Food Nutrients</h2>";
