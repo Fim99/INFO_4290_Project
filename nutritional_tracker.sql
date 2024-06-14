@@ -10,7 +10,7 @@ CREATE TABLE users
     email VARCHAR(255) UNIQUE NOT NULL,
     username VARCHAR(50) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
-    alerts JSON NOT NULL
+    alerts JSON
 );
 
 -- Create the meals table
