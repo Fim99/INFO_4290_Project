@@ -26,10 +26,10 @@ if (isset($_GET['fdcId']))
         // Check if the response contains the food item details
         if (isset($data))
         {
-            echo "<h1>" . htmlspecialchars($data['description'] ?? 'N/A') . "</h1>";
+            echo "<h1>" . htmlspecialchars($data['description'] ?? '---') . "</h1>";
             // Display additional details about the food item
-            echo "<p>FDC ID: " . htmlspecialchars($data['fdcId'] ?? 'N/A') . "</p>";
-            echo "<p>Data Type: " . htmlspecialchars($data['dataType'] ?? 'N/A') . "</p>";
+            echo "<p>FDC ID: " . htmlspecialchars($data['fdcId'] ?? '---') . "</p>";
+            echo "<p>Data Type: " . htmlspecialchars($data['dataType'] ?? '---') . "</p>";
 
             // Display nutrients in a table
             if (isset($data['foodNutrients']) && is_array($data['foodNutrients']) && count($data['foodNutrients']) > 0)

@@ -64,7 +64,8 @@ if (isset($_GET['query']))
                     $headers = ['Description', 'FDC ID', 'SR Food Category'];
                     break;
                 default:
-                    $headers = ['Description', 'FDC ID']; // Default headers
+                    // Default headers
+                    $headers = ['Description', 'FDC ID']; 
                     break;
             }
 
