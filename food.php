@@ -41,9 +41,9 @@ if (isset($_GET['fdcId']))
                 foreach ($data['foodNutrients'] as $nutrient)
                 {
                     echo "<tr>";
-                    echo "<td>" . htmlspecialchars($nutrient['nutrient']['name'] ?? 'N/A') . "</td>";
-                    echo "<td>" . htmlspecialchars($nutrient['amount'] ?? 'N/A') . "</td>";
-                    echo "<td>" . htmlspecialchars($nutrient['nutrient']['unitName'] ?? 'N/A') . "</td>";
+                    echo "<td>" . htmlspecialchars($nutrient['nutrient']['name'] ?? '---') . "</td>";
+                    echo "<td>" . htmlspecialchars($nutrient['amount'] ?? '---') . "</td>";
+                    echo "<td>" . htmlspecialchars($nutrient['nutrient']['unitName'] ?? '---') . "</td>";
                     echo "</tr>";
                 }
                 echo "</table>";
