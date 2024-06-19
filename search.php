@@ -91,7 +91,7 @@ function displayTableRow($food, $dataType)
 if (!isset($_GET['query']))
 {
     echo "No query specified.";
-    exit;
+    return;
 }
 
 // Encode the query parameter to ensure safe inclusion in the URL
@@ -110,14 +110,14 @@ $data = fetchApiData($url);
 if ($data === null)
 {
     echo "An error occurred while fetching data from the API.";
-    exit;
+    return;
 }
 
 // Check if the response contains any food items
 if (empty($data['foods']))
 {
     echo "No results found.";
-    exit;
+    return;
 }
 
 // Display the results in a table

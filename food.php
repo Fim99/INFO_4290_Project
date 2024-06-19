@@ -43,7 +43,7 @@ function displayFoodDetails($data)
 if (!isset($_GET['fdcId']))
 {
     echo "No food item specified.";
-    exit;
+    return;
 }
 
 // Get the fdcId from the URL parameter
@@ -59,21 +59,21 @@ $data = fetchApiData($url);
 if ($data === null)
 {
     echo "An error occurred while fetching data from the API.";
-    exit;
+    return;
 }
 
 // Check if the response contains the food item details
 if (!isset($data['description']))
 {
     echo "No details found for this food item.";
-    exit;
+    return;
 }
 
 // Check if foodNutrients are present and not empty
 if (!isset($data['foodNutrients']) || !is_array($data['foodNutrients']) || count($data['foodNutrients']) === 0)
 {
     echo "<p>No nutrient information available.</p>";
-    exit;
+    return;
 }
 
 // Display food details
