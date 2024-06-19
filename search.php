@@ -100,6 +100,13 @@ $query = urlencode($_GET['query']);
 // Get additional parameters from the URL
 $additionalParams = getAdditionalParams(['dataType', 'pageSize', 'pageNumber', 'sortBy', 'sortOrder', 'brandOwner']);
 
+// Check if dataType is selected
+if (empty($additionalParams['dataType']))
+{
+    echo "No data type specified.";
+    return;
+}
+
 // Build the API URL
 $url = buildApiUrl($query, $additionalParams);
 
