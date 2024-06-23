@@ -3,6 +3,8 @@ DROP DATABASE IF EXISTS nutritional_tracker;
 CREATE DATABASE nutritional_tracker;
 USE nutritional_tracker;  -- MySQL command
 
+SET GLOBAL event_scheduler="ON";
+
 -- Create the users table
 CREATE TABLE users 
 (
@@ -12,6 +14,24 @@ CREATE TABLE users
     password VARCHAR(255) NOT NULL,
     alerts JSON
 );
+
+-- Create the unverified users table
+CREATE TABLE unverified_users 
+(
+    id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+	code VARCHAR(50) NOT NULL,
+	expires INT NOT NULL
+);
+
+-- Create an event to remove expired verification requests
+CREATE EVENT event_purge_unverified_users
+    ON SCHEDULE
+      EVERY 15 MINUTE
+    DO
+      DELETE FROM unverified_users WHERE expires <= UNIX_TIMESTAMP();
 
 -- Create the meals table
 CREATE TABLE meals 
