@@ -1,3 +1,7 @@
+<?php
+	session_start();
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -44,6 +48,8 @@
 		die("Connection failed: " . $conn->connect_error);
 	}
 
+	$valid_input = false;
+
 	if(isset($_POST["submit"]))
 	{
 		$email = $_POST["email"];
@@ -53,8 +59,8 @@
 
 		$valid_input = true;
 
-		// Check if the inputted passwords match.
-		if ($password != $confirm_password)
+		// Check if the passwords match.
+		if ($password != $confirm_password && $valid_input)
 		{
 			echo "<p>Passwords do not match.</p>";
 			$valid_input = false;
@@ -62,47 +68,68 @@
 
 		// Sanitize the email and username input.
 		// No need to sanatize the password, as it will be hashed.
-		$email = mysqli_real_escape_string($conn, $email);
-		$username = mysqli_real_escape_string($conn, $username);
+		$sanitized_email = mysqli_real_escape_string($conn, $email);
+		$sanitized_username = mysqli_real_escape_string($conn, $username);
 
 		
 		// Hash password for database storage
 		// Note: To check if a password matches a hash, use password_verify($password, $hash)
 		$password = password_hash($password, PASSWORD_DEFAULT);
 
-		// Check if email and/or username is already used.
-		$sql = "SELECT * FROM users WHERE email = '$email' LIMIT 1";
+		// Check if email is already used.
+		$sql = "SELECT * FROM users WHERE email = '$sanitized_email' LIMIT 1";
 		$result = $conn->query($sql);
-		if($result->num_rows > 0)
+		if($result->num_rows > 0 && $valid_input)
 		{
-			// To-Do: If the email is already in use, redirect to email verification page without sending an email.
-			// This will be done in an attempt to mitigate user enumeration.
+			echo "<p>Email already in use.</p>";
 			$valid_input = false;
 		}
 
-		$sql = "SELECT * FROM users WHERE username = '$username' LIMIT 1";
+		// Check if username is already used.
+		$sql = "SELECT * FROM users WHERE username = '$sanitized_username' LIMIT 1";
 		$result = $conn->query($sql);
-		if($result->num_rows > 0)
+		if($result->num_rows > 0 && $valid_input)
 		{
 			echo "<p>Username is taken.</p>";
 			$valid_input = false;
 		}
 
-		// Perform email verification
-		// To-Do: Create seperate page for verification and redirect to it here.
-		// To-Do: Create database table for temporary unverified users with a column for the verification code.
+		// To-Do: Enforce username and password requirements (e.g. minimum length, special characters, etc.)
 
-		// Add account to database
-		// Note: This code will need to be executed on the verification page after sucessful verification.
+		// Perform email verification
+		// An email will be sent with the code.
 		if($valid_input)
 		{
-			$sql = "INSERT INTO users (email, username, password) VALUES ('$email', '$username', '$password')";
+			$verification_code = rand(100000, 999999);
 
-			if ($conn->query($sql) === TRUE) {
-				echo "<p>New record created successfully</p>";
-			} else {
-				echo "<p>Error: " . $sql . "<br>" . $conn->error . "</p>";
+			// To-Do: Configure SMTP
+			// For now, testing it locally with Papercut SMTP.
+			$to = $email;
+			$subject = "Account verification for " . $username;
+			$txt = "Your verification code: " . $verification_code;
+			$headers = "From: nutritional_tracker@test.com";
+
+			mail($to,$subject,$txt,$headers);
+
+			$expires = time() + (5 * 60); // 5 minutes until code expires
+
+			// If the email is already used in the unverified_users table...
+			$sql = "SELECT * FROM unverified_users WHERE email = '$sanitized_email' LIMIT 1";
+			$result = $conn->query($sql);
+			if($result->num_rows > 0)
+			{
+				// Update the existing entry.
+				$sql = "UPDATE unverified_users SET username='$sanitized_username', password='$password', code='$verification_code', expires='$expires' WHERE email='$sanitized_email'";
 			}
+			else
+			{
+				// Add a new entry.
+				$sql = "INSERT INTO unverified_users (email, username, password, code, expires) VALUES ('$sanitized_email', '$sanitized_username', '$password', '$verification_code', '$expires')";
+			}
+			
+			$conn->query($sql);
+			$_SESSION["email"] = $sanitized_email;
+			header("Location: verify_account.php");
 		}
 		
 		$conn->close();
