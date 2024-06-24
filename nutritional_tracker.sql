@@ -23,7 +23,8 @@ CREATE TABLE unverified_users
     username VARCHAR(50) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
 	code VARCHAR(50) NOT NULL,
-	expires INT NOT NULL
+	expires INT NOT NULL,
+	attempts INT NOT NULL
 );
 
 -- Create an event to remove expired verification requests

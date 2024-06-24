@@ -27,7 +27,7 @@
 	<form name="account_verification" method="post" action="">
 		<div class="col-sm-3 mb-2">
 			<label for="username" class="form-label">Enter Verification Code:</label>
-			<input type="text" name="code" class="form-control" id="code" required>
+			<input type="text" name="code" class="form-control" id="code" autocomplete="off" required>
 		</div>
 		<button type="submit" name="submit" class="btn btn-primary">Submit</button>
 	</form>
@@ -47,6 +47,7 @@
 
 	$verified = false;
 	$code_expired = false;
+	$max_attempts_reached = false;
 	if(isset($_POST["submit"]))
 	{
 		$sql = "SELECT * FROM unverified_users WHERE email = '$email' LIMIT 1";
@@ -82,11 +83,22 @@
 		}
 		else if ($_POST["code"] != $correct_code)
 		{
-			echo "<p>Incorrect code.</p>"; //
+			$attempts = $result->attempts;
+			if(++$attempts >= 5)
+			{
+				$max_attempts_reached = true;
+				echo "<p>Maximum failed attempts reached. Code has expired.</p>";
+				header('Refresh: 2; url=register.php');
+			}
+			else
+			{
+				echo "<p>Incorrect code.</p>";
+				$conn->query("UPDATE unverified_users SET attempts='$attempts' WHERE email='$email'");
+			}
 		}
 	}
 
-	if($verified || $code_expired)
+	if($verified || $code_expired || $max_attempts_reached)
 	{
 		$sql = "DELETE FROM unverified_users WHERE email = '$email'";
 		$conn->query($sql);
