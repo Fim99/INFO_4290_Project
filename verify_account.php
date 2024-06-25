@@ -9,6 +9,9 @@
 	{
 		$email = $_SESSION["email"];
 	}
+
+	if(isset($_SESSION["email_in_use"]) && !isset($_SESSION["attempts"]))
+		$_SESSION["attempts"] = 0;
 ?>
 
 <!DOCTYPE html>
@@ -52,6 +55,7 @@
 	{
 		$sql = "SELECT * FROM unverified_users WHERE email = '$email' LIMIT 1";
 		$results = $conn->query($sql);
+		
 		if($results->num_rows > 0) // If there is a matching entry in unverified_users
 			$result = $results->fetch_object();
 		else
@@ -64,7 +68,7 @@
 		
 		if(!$code_expired && $_POST["code"] == $correct_code) // If the correct code is entered by the user.
 		{
-			$username = $result->username;
+			$username = $conn->real_escape_string($result->username);
 			$password = $result->password;
 
 			$sql = "INSERT INTO users (email, username, password) VALUES ('$email', '$username', '$password')";
@@ -76,15 +80,17 @@
 			echo "<p>Your email has been succesfully verified!</p>";
 			header('Refresh: 2; url=index.php'); // Placeholder
 		}
-		else if ($code_expired)
+		else if ($code_expired && !isset($_SESSION["email_in_use"]))
 		{
 			echo "<p>The code has expired.</p>";
 			header('Refresh: 2; url=register.php'); // Redirect back to the registration page after a few seconds.
 		}
-		else if ($_POST["code"] != $correct_code)
+		else
 		{
-			$attempts = $result->attempts;
-			if(++$attempts >= 5)
+			if(!isset($_SESSION["email_in_use"]))
+				$_SESSION["attempts"] = $result->attempts;
+			
+			if(++$_SESSION["attempts"] >= 5)
 			{
 				$max_attempts_reached = true;
 				echo "<p>Maximum failed attempts reached. Code has expired.</p>";
@@ -93,12 +99,13 @@
 			else
 			{
 				echo "<p>Incorrect code.</p>";
-				$conn->query("UPDATE unverified_users SET attempts='$attempts' WHERE email='$email'");
+				if(!isset($_SESSION["email_in_use"]))
+					$conn->query("UPDATE unverified_users SET attempts=" . $_SESSION["attempts"] . " WHERE email='$email'");
 			}
 		}
 	}
 
-	if($verified || $code_expired || $max_attempts_reached)
+	if($verified || ($code_expired && !isset($_SESSION["email_in_use"])) || $max_attempts_reached)
 	{
 		$sql = "DELETE FROM unverified_users WHERE email = '$email'";
 		$conn->query($sql);

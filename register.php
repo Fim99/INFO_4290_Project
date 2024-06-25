@@ -81,8 +81,7 @@
 		$result = $conn->query($sql);
 		if($result->num_rows > 0 && $valid_input)
 		{
-			echo "<p>Email already in use.</p>";
-			$valid_input = false;
+			$_SESSION["email_in_use"] = true;
 		}
 
 		// Check if username is already used.
@@ -100,34 +99,37 @@
 		// An email will be sent with the code.
 		if($valid_input)
 		{
-			$verification_code = rand(100000, 999999);
-
-			// To-Do: Configure SMTP
-			// For now, testing it locally with Papercut SMTP.
-			$to = $email;
-			$subject = "Account verification for " . $username;
-			$txt = "Your verification code: " . $verification_code;
-			$headers = "From: nutritional_tracker@test.com";
-
-			mail($to,$subject,$txt,$headers);
-
-			$expires = time() + (5 * 60); // 5 minutes until code expires
-
-			// If the email is already used in the unverified_users table...
-			$sql = "SELECT * FROM unverified_users WHERE email = '$sanitized_email' LIMIT 1";
-			$result = $conn->query($sql);
-			if($result->num_rows > 0)
+			if(!isset($_SESSION["email_in_use"]))
 			{
-				// Update the existing entry.
-				$sql = "UPDATE unverified_users SET username='$sanitized_username', password='$password', code='$verification_code', expires='$expires' WHERE email='$sanitized_email'";
+				$verification_code = rand(100000, 999999);
+
+				// To-Do: Configure SMTP
+				// For now, testing it locally with Papercut SMTP.
+				$to = $email;
+				$subject = "Account verification for " . $username;
+				$txt = "Your verification code: " . $verification_code;
+				$headers = "From: nutritional_tracker@test.com";
+				mail($to,$subject,$txt,$headers);
+
+				$expires = time() + (5 * 60); // 5 minutes until code expires
+
+				// If the email is already used in the unverified_users table...
+				$sql = "SELECT * FROM unverified_users WHERE email = '$sanitized_email' LIMIT 1";
+				$result = $conn->query($sql);
+				if($result->num_rows > 0)
+				{
+					// Update the existing entry.
+					$sql = "UPDATE unverified_users SET username='$sanitized_username', password='$password', code='$verification_code', expires='$expires', attempts=0 WHERE email='$sanitized_email'";
+				}
+				else
+				{
+					// Add a new entry.
+					$sql = "INSERT INTO unverified_users (email, username, password, code, expires) VALUES ('$sanitized_email', '$sanitized_username', '$password', '$verification_code', '$expires')";
+				}
+				
+				$conn->query($sql);
 			}
-			else
-			{
-				// Add a new entry.
-				$sql = "INSERT INTO unverified_users (email, username, password, code, expires) VALUES ('$sanitized_email', '$sanitized_username', '$password', '$verification_code', '$expires')";
-			}
-			
-			$conn->query($sql);
+				
 			$_SESSION["email"] = $sanitized_email;
 			header("Location: verify_account.php");
 		}
