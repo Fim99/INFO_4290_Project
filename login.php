@@ -46,6 +46,32 @@
 		$username = $_POST["username"];
 		$password = $_POST["password"];
 
+		// Protect against SQL injection attack
+		$username = stripcslashes($username);  
+        $password = stripcslashes($password);  
+        $username = mysqli_real_escape_string($conn, $username);  
+        $password = mysqli_real_escape_string($conn, $password);  
+
+		$sql = "SELECT * FROM users where username = '$username'";
+		$result = $conn->query($sql);
+		$row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+
+		$hashed_password = $row["password"];
+		$count = mysqli_num_rows($result);  
+		
+		// Checking if inputs match database
+		if($result->num_rows == 1)
+		{
+			echo "<h1>Username found</h1>";
+			if(password_verify($password, $hashed_password)){
+				echo '<h1>Password is correct</h1>';
+			}
+			else
+				echo '<h1>Password is incorrect</h1>';
+		}
+		else
+			echo "<h1>Username not found</h1>";
+
         $conn->close();
     }
 
