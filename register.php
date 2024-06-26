@@ -21,15 +21,15 @@
 		</div>
 		<div class="col-sm-6 mb-2">
 			<label for="username" class="form-label">Username</label>
-			<input type="text" name="username" class="form-control" id="username" required>
+			<input type="text" name="username" class="form-control" id="username" autocomplete="off" minlength="3" maxlength="50" required>
 		</div>
 		<div class="col-sm-6 mb-2">
 			<label for="password" class="form-label">Password</label>
-			<input type="password" name="password" class="form-control" id="password" required>
+			<input type="password" name="password" class="form-control" id="password" minlength="8" maxlength="72" required>
 		</div>
 		<div class="col-sm-6 mb-2">
 			<label for="confirm_password1" class="form-label">Confirm Password</label>
-			<input type="password" name="confirm_password" class="form-control" id="confirm_password" required>
+			<input type="password" name="confirm_password" class="form-control" id="confirm_password" minlength="8" maxlength="72" required>
 		</div>
 		<button type="submit" name="submit" class="btn btn-primary">Submit</button>
 	</form>
@@ -63,6 +63,14 @@
 		if ($password != $confirm_password && $valid_input)
 		{
 			echo "<p>Passwords do not match.</p>";
+			$valid_input = false;
+		}
+
+		// Limit the amount of possible characters for the username.
+		if(preg_match("/[^A-z0-9_-]/", $username) && $valid_input)
+		{
+			echo "<p>Username contains invalid characters.</p>";
+			echo "<p>Only alphanumeric characters, underscores, and hyphens are permitted.</p>";
 			$valid_input = false;
 		}
 
