@@ -78,7 +78,7 @@
 			// Proceed to login page
 			// Perhaps include an intermediary page, stating that the email is now verified.
 			echo "<p>Your email has been succesfully verified!</p>";
-			header('Refresh: 2; url=index.php'); // Placeholder
+			header('Refresh: 2; url=login.php');
 		}
 		else if ($code_expired && !isset($_SESSION["email_in_use"]))
 		{
