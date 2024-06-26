@@ -55,14 +55,13 @@
 		$sql = "SELECT * FROM users where username = '$username'";
 		$result = $conn->query($sql);
 		$row = mysqli_fetch_array($result, MYSQLI_ASSOC);
-
-		$hashed_password = $row["password"];
 		$count = mysqli_num_rows($result);  
 		
 		// Checking if inputs match database
 		if($result->num_rows == 1)
 		{
 			echo "<h1>Username found</h1>";
+			$hashed_password = $row["password"];
 			if(password_verify($password, $hashed_password)){
 				echo '<h1>Password is correct</h1>';
 			}
