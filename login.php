@@ -19,13 +19,20 @@
             </div>
             <div class="d-inline">
                 <button class="btn btn-primary" type="submit" name="submit">Log In</button>
-                <a href=#>Forgot Password?</a>
+                <a href='forgot_password.php'>Forgot Password?</a>
             </div>
             <div class="pt-2">
                 <a href="register.php"><button class="btn btn-secondary" type="button" name="register" id="register">Register Here</button></a>
             </div>
         </div>
     </form>
+	<?php
+        if(isset($_GET["newpwd"])){
+            if ($_GET["newpwd"] == "passwordupdated"){
+                echo "<p>Your password was successfully changed</p>";
+            }
+        }
+    ?>
 </body>
 </html>
 
