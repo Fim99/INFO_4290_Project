@@ -37,6 +37,8 @@
 </html>
 
 <?php
+    session_start();
+    
 	$sql_servername = "localhost";
 	$sql_username = "root";
 	$sql_password = "";
@@ -71,6 +73,7 @@
 			$hashed_password = $row["password"];
 			if(password_verify($password, $hashed_password)){
 				echo '<h1>Password is correct</h1>';
+                $_SESSION['id'] = $row['id']; // Store the user's ID in the session
 			}
 			else
 				echo '<h1>Password is incorrect</h1>';

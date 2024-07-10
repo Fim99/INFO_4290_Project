@@ -59,7 +59,7 @@ function displayTableRow($food, $dataType)
 {
     // Concatenate  HTML to variable to be returned
     $html = "<tr>";
-    $html .= "<td><a href='food.php?fdcId=" . urlencode($food['fdcId']) . "'>" . (empty($food['description']) ? "---" : htmlspecialchars($food['description'])) . "</a></td>";
+    $html .= "<td><a href='meal_functions/food.php?fdcId=" . urlencode($food['fdcId']) . "'>" . (empty($food['description']) ? "---" : htmlspecialchars($food['description'])) . "</a></td>";
     $html .= "<td>" . (empty($food['fdcId']) ? "---" : htmlspecialchars($food['fdcId'])) . "</td>";
 
     switch ($dataType)

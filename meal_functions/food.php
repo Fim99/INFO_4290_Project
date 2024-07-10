@@ -1,6 +1,6 @@
 <?php
 include 'api.php';
-include 'bootstrap.html';
+include '../bootstrap.html';
 
 // Function to build the API URL for fetching food details
 function buildApiUrl($fdcId)

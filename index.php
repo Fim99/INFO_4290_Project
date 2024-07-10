@@ -66,7 +66,7 @@
 
     <div id="results">
         <!-- Include search results from search.php -->
-        <br><?php include 'search.php'; ?>
+        <br><?php include 'meal_functions/search.php'; ?>
     </div>
 </body>
 
