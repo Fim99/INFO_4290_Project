@@ -9,7 +9,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registration</title>
-    <?php include 'bootstrap.html'?>
+    <?php include '../bootstrap.html'?>
 </head>
 
 <body>
@@ -31,7 +31,7 @@
 			<div class="mb-2" style="margin-left:auto">
 				<button type="submit" name="submit" class="btn btn-primary w-50">Submit</button>
 			</div>
-			<p>Already have an account? <a href="login.php">Click here</a></p>
+			<p>Already have an account? <a href="../login.php">Click here</a></p>
 		</div>	
 		
 	</form>
@@ -146,7 +146,7 @@
 			}
 				
 			$_SESSION["email"] = $sanitized_email;
-			header("Location: verify_account.php");
+			header("Location: ../account_functions/verify_account.php");
 		}
 		
 		$conn->close();

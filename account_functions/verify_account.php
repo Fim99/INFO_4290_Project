@@ -2,7 +2,7 @@
 	session_start();
 	if(!isset($_SESSION["email"]))
 	{
-		header("Location: register.php"); // Redirect back to register.php if the user tried to go directly to this page.
+		header("Location: ../account_functions/register.php"); // Redirect back to register.php if the user tried to go directly to this page.
 		exit;
 	}
 	else
@@ -21,7 +21,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verification</title>
-    <?php include 'bootstrap.html'?>
+    <?php include '../bootstrap.html'?>
 </head>
 
 <body>
@@ -78,12 +78,12 @@
 			// Proceed to login page
 			// Perhaps include an intermediary page, stating that the email is now verified.
 			echo "<p>Your email has been succesfully verified!</p>";
-			header('Refresh: 2; url=login.php');
+			header('Refresh: 2; url=../account_functions/login.php');
 		}
 		else if ($code_expired && !isset($_SESSION["email_in_use"]))
 		{
 			echo "<p>The code has expired.</p>";
-			header('Refresh: 2; url=register.php'); // Redirect back to the registration page after a few seconds.
+			header('Refresh: 2; url=../account_functions/register.php'); // Redirect back to the registration page after a few seconds.
 		}
 		else
 		{
@@ -94,7 +94,7 @@
 			{
 				$max_attempts_reached = true;
 				echo "<p>Maximum failed attempts reached. Code has expired.</p>";
-				header('Refresh: 2; url=register.php');
+				header('Refresh: 2; url=../account_functions/register.php');
 			}
 			else
 			{

@@ -5,7 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Food Search</title>
-    <?php include 'bootstrap.html'?>
+    <?php 
+    include 'bootstrap.html';
+    include 'nav.php';
+    ?>
 </head>
 
 <body>
