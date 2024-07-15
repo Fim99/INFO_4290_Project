@@ -6,11 +6,13 @@ include '../nav.php';
 include '../account_functions/check_loggin.php';
 include 'api.php';
 
+// Database connection details
 $sql_servername = "localhost";
 $sql_username = "root";
 $sql_password = "";
 $sql_dbname = "nutritional_tracker";
 
+// Create database connection
 $conn = new mysqli($sql_servername, $sql_username, $sql_password, $sql_dbname);
 if ($conn->connect_error)
 {
@@ -22,31 +24,18 @@ function getUserDetails($conn, $user_id)
 {
     $sql = "SELECT * FROM users WHERE id = $user_id";
     $result = $conn->query($sql);
-    if ($result && $result->num_rows > 0)
-    {
-        return $result->fetch_assoc(); // Fetches the user details as an associative array
-    }
-    else
-    {
-        return null;
-    }
+    return ($result && $result->num_rows > 0) ? $result->fetch_assoc() : null;
 }
 
 // Function to get user meals by user ID
 function getUserMeals($conn, $user_id)
 {
     $meals = [];
-
-    // Prepare SQL statement to fetch meals ordered by created_at in descending order
     $sql = "SELECT id, name, created_at FROM meals WHERE user_id = $user_id ORDER BY created_at DESC";
-
-    // Execute query
     $result = $conn->query($sql);
 
-    // Check if query executed successfully
     if ($result && $result->num_rows > 0)
     {
-        // Fetch all rows into an associative array
         while ($row = $result->fetch_assoc())
         {
             $meals[] = [
@@ -63,111 +52,94 @@ function getUserMeals($conn, $user_id)
 // Function to get current meal details by meal ID
 function getCurrentMealDetails($conn, $meal_id)
 {
-    // Prepare SQL statement to fetch meal based on current meal
     $sql = "SELECT name FROM meals WHERE id = $meal_id";
-
-    // Execute query
     $result = $conn->query($sql);
-
-    if ($result && $result->num_rows > 0)
-    {
-        $row = $result->fetch_assoc();
-        return $row['name'];
-    }
-    else
-    {
-        return "None Selected";
-    }
+    return ($result && $result->num_rows > 0) ? $result->fetch_assoc()['name'] : "None Selected";
 }
 
 // Function to add a new meal for the current user
 function addNewMeal($conn, $user_id, $meal_name)
 {
-    // Escape the meal name to prevent SQL injection
     $escaped_meal_name = $conn->real_escape_string($meal_name);
+    $created_at = date('Y-m-d H:i:s');
+    $sql = "INSERT INTO meals (user_id, name, food_fdcid, created_at) VALUES ('$user_id', '$escaped_meal_name', '[]', '$created_at')";
 
-    // Values for the new meal
-    $id = NULL; // Auto-incremented
-    $food_fdcid = json_encode(['Currently Empty']); // Example JSON format
-    $created_at = date('Y-m-d H:i:s'); // Current timestamp
-
-    // Prepare SQL statement with values
-    $sql = "INSERT INTO meals (id, user_id, name, food_fdcid, created_at) VALUES ('$id', '$user_id', '$escaped_meal_name', '$food_fdcid', '$created_at')";
-
-    // Execute query
     if ($conn->query($sql) === TRUE)
     {
-        // Get the ID of the newly inserted meal
-        $new_meal_id = $conn->insert_id;
-
-        // Set the newly inserted meal as the current meal
-        $_SESSION['current_meal_id'] = $new_meal_id;
-
-        return true; // Successfully inserted
+        $_SESSION['current_meal_id'] = $conn->insert_id;
+        return true;
     }
-    else
-    {
-        return false; // Error inserting
-    }
+
+    return false;
+}
+
+// Function to delete a meal from the database
+function deleteMeal($conn, $meal_id)
+{
+    $sql = "DELETE FROM meals WHERE id = $meal_id";
+    return $conn->query($sql);
 }
 
 // Handle form submissions
-if ($_SERVER['REQUEST_METHOD'] === 'POST')
+function handleFormSubmissions($conn)
 {
-    if (isset($_POST['new_meal_name']))
+    if ($_SERVER['REQUEST_METHOD'] === 'POST')
     {
-        $newMealName = $_POST['new_meal_name'];
-
-        // Check if the meal name is empty
-        if (empty($newMealName))
+        if (isset($_POST['new_meal_name']))
         {
-            echo "Meal name cannot be empty.";
-            exit; // Exit early if meal name is empty
+            $newMealName = $_POST['new_meal_name'];
+            if (empty($newMealName))
+            {
+                $_SESSION['error_message'] = "Meal name cannot be empty.";
+            }
+            elseif (addNewMeal($conn, $_SESSION['id'], $newMealName))
+            {
+                $_SESSION['success_message'] = "Meal added successfully.";
+                header("Location: " . $_SERVER['PHP_SELF']);
+                exit();
+            }
+            else
+            {
+                $_SESSION['error_message'] = "Error adding new meal.";
+            }
         }
 
-        // Attempt to add the new meal
-        $added = addNewMeal($conn, $_SESSION['id'], $newMealName);
-
-        if ($added)
+        if (isset($_POST['set_current_meal']))
         {
-            // Refresh the page or perform any additional actions upon success
-            header("Location: " . $_SERVER['PHP_SELF']);
-            exit();
+            $_SESSION['current_meal_id'] = $_POST['set_current_meal'];
         }
-        else
+
+        if (isset($_POST['delete_meal']))
         {
-            echo "Error adding new meal.";
-            exit; // Exit early on error
+            $mealId = $_POST['delete_meal'];
+            if (deleteMeal($conn, $mealId))
+            {
+                $_SESSION['success_message'] = "Meal deleted successfully.";
+                header("Location: " . $_SERVER['PHP_SELF']);
+                exit;
+            }
+            else
+            {
+                $_SESSION['error_message'] = "Error deleting meal.";
+            }
         }
-    }
 
-    // Handle setting current meal
-    if (isset($_POST['set_current_meal']))
-    {
-        $currentMealId = $_POST['set_current_meal'];
-        $_SESSION['current_meal_id'] = $currentMealId;
-    }
-
-    // Handle deleting session
-    if (isset($_POST['delete_session']))
-    {
-        // Destroy the session
-        session_destroy();
-
-        // Redirect to Login
-        header("Location: ../account_functions/login.php");
-        exit;
+        if (isset($_POST['delete_session']))
+        {
+            session_destroy();
+            header("Location: ../account_functions/login.php");
+            exit;
+        }
     }
 }
 
-// Get user details by session user_id (assuming it's set)
+// ------ MAIN CODE START WHERE METHODS ARE CALLED -------
+
+handleFormSubmissions($conn);
 $userDetails = getUserDetails($conn, $_SESSION['id']);
-
-// Get user meals by user ID
 $meals = getUserMeals($conn, $_SESSION['id']);
-
-// Get current meal name if session variable is set
 $currentMealName = isset($_SESSION['current_meal_id']) ? getCurrentMealDetails($conn, $_SESSION['current_meal_id']) : "None Selected";
+
 ?>
 
 <!DOCTYPE html>
@@ -184,13 +156,19 @@ $currentMealName = isset($_SESSION['current_meal_id']) ? getCurrentMealDetails($
     <div class="container">
         <h1>Meal Records</h1>
 
-        <!-- Display session variables -->
-        <h2>Session Variables</h2>
-        <pre><?php print_r($_SESSION); ?></pre>
-        <pre><?php echo htmlspecialchars($userDetails['email']); ?></pre> <!-- Displaying email -->
-        <pre><?php echo htmlspecialchars($userDetails['username']); ?></pre> <!-- Displaying username -->
-        <pre><?php echo htmlspecialchars($userDetails['id']); ?></pre> <!-- Displaying user ID -->
+        <!-- Display success message if set -->
+        <?php if (isset($_SESSION['success_message'])) : ?>
+            <div class="alert alert-success"><?= $_SESSION['success_message'] ?></div>
+            <?php unset($_SESSION['success_message']); ?>
+        <?php endif; ?>
 
+        <!-- Display error message if set -->
+        <?php if (isset($_SESSION['error_message'])) : ?>
+            <div class="alert alert-danger"><?= $_SESSION['error_message'] ?></div>
+            <?php unset($_SESSION['error_message']); ?>
+        <?php endif; ?>
+
+        <!-- Form to set current meal -->
         <form method="post">
             <div class="form-group">
                 <label for="setCurrentMeal">Select Meal to Modify (Currently:
@@ -208,6 +186,7 @@ $currentMealName = isset($_SESSION['current_meal_id']) ? getCurrentMealDetails($
 
         <hr>
 
+        <!-- Form to create new meal -->
         <form method="post">
             <div class="form-group">
                 <label for="newMealName">Create New Meal</label>
@@ -217,10 +196,9 @@ $currentMealName = isset($_SESSION['current_meal_id']) ? getCurrentMealDetails($
             <button type="submit" class="btn btn-success">Create Meal</button>
         </form>
 
-        <!-- Form for Delete Session button -->
+        <!-- Form to delete session -->
         <form method="post">
             <button type="submit" class="btn btn-danger" name="delete_session">Delete Session</button>
-            <!-- Destroy Session -->
         </form>
 
         <!-- Display table of meals -->
@@ -230,13 +208,22 @@ $currentMealName = isset($_SESSION['current_meal_id']) ? getCurrentMealDetails($
                 <tr>
                     <th>Meal Name</th>
                     <th>Date Created</th>
+                    <th>Action</th> <!-- New column for delete action -->
                 </tr>
             </thead>
             <tbody>
                 <?php foreach ($meals as $meal) : ?>
                     <tr>
-                        <td><?= htmlspecialchars($meal['name']) ?></td>
+                        <td><a
+                                href="meal_functions/meal_details.php?meal_id=<?= htmlspecialchars($meal['id']) ?>"><?= htmlspecialchars($meal['name']) ?></a>
+                        </td>
                         <td><?= htmlspecialchars($meal['created_at']) ?></td>
+                        <td>
+                            <form method="post" onsubmit="return confirm('Are you sure you want to delete this meal?');">
+                                <input type="hidden" name="delete_meal" value="<?= htmlspecialchars($meal['id']) ?>">
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                            </form>
+                        </td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>

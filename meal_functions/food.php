@@ -1,6 +1,21 @@
 <?php
+session_start();
+
 include 'api.php';
 include '../bootstrap.html';
+include '../nav.php';
+
+// Database connection details
+$sql_servername = "localhost";
+$sql_username = "root";
+$sql_password = "";
+$sql_dbname = "nutritional_tracker";
+
+$conn = new mysqli($sql_servername, $sql_username, $sql_password, $sql_dbname);
+if ($conn->connect_error)
+{
+    die("Connection failed: " . $conn->connect_error);
+}
 
 // Function to build the API URL for fetching food details
 function buildApiUrl($fdcId)
@@ -37,46 +52,117 @@ function displayFoodDetails($data)
     }
     echo "</table>";
     echo "</div>";
+
+    // Form to add FDC ID to current meal
+    echo "<form method='post'>";
+    echo "<input type='hidden' name='fdcId' value='" . htmlspecialchars($data['fdcId'] ?? '---') . "'>";
+    echo "<button type='submit' class='btn btn-primary'>Add to Current Meal</button>";
+    echo "</form>";
+}
+
+/// Function to handle adding FDC ID to the current meal
+function addFdcIdToMeal($conn)
+{
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['fdcId']))
+    {
+        $fdcId = $conn->real_escape_string($_POST['fdcId']);
+        $currentMealId = $_SESSION['current_meal_id'];
+
+        if (!isset($currentMealId))
+        {
+            $_SESSION['error_message'] = "No current meal selected.";
+            return;
+        }
+
+        // Fetch the current food_fdcid from the database
+        $sql = "SELECT food_fdcid FROM meals WHERE id = $currentMealId";
+        $result = $conn->query($sql);
+
+        if ($result && $result->num_rows > 0)
+        {
+            $row = $result->fetch_assoc();
+            $currentFoodFdcid = json_decode($row['food_fdcid'], true);
+
+            // Add the new FDC ID to the existing array
+            $currentFoodFdcid[] = $fdcId;
+
+            // Update the database with the new array
+            $newFoodFdcidJson = json_encode($currentFoodFdcid);
+            $sqlUpdate = "UPDATE meals SET food_fdcid = '$newFoodFdcidJson' WHERE id = $currentMealId";
+
+            if ($conn->query($sqlUpdate) === TRUE)
+            {
+                $_SESSION['success_message'] = "Food added to the current meal.";
+                // Redirect with the fdcId parameter
+                header("Location: " . $_SERVER['PHP_SELF'] . "?fdcId=" . urlencode($fdcId));
+                exit;
+            }
+            else
+            {
+                $_SESSION['error_message'] = "Error updating meal: " . $conn->error;
+            }
+        }
+        else
+        {
+            $_SESSION['error_message'] = "Current meal not found.";
+        }
+    }
+}
+
+// Function to fetch and display food details
+function fetchAndDisplayDetails($fdcId)
+{
+    $url = buildApiUrl($fdcId);
+    $data = fetchApiData($url);
+
+    if ($data === null)
+    {
+        $_SESSION['error_message'] = "An error occurred while fetching data from the API.";
+        return;
+    }
+
+    if (!isset($data['description']))
+    {
+        $_SESSION['error_message'] = "No details found for this food item.";
+        return;
+    }
+
+    if (!isset($data['foodNutrients']) || !is_array($data['foodNutrients']) || count($data['foodNutrients']) === 0)
+    {
+        $_SESSION['error_message'] = "No nutrient information available.";
+        return;
+    }
+
+    displayFoodDetails($data);
 }
 
 // ------ MAIN CODE START WHERE METHODS ARE CALLED -------
+
+// Handle form submission
+addFdcIdToMeal($conn);
+
+// Display success message if set
+if (isset($_SESSION['success_message']))
+{
+    echo "<div class='alert alert-success'>" . $_SESSION['success_message'] . "</div>";
+    unset($_SESSION['success_message']);
+}
+
+// Display error message if set
+if (isset($_SESSION['error_message']))
+{
+    echo "<div class='alert alert-danger'>" . $_SESSION['error_message'] . "</div>";
+    unset($_SESSION['error_message']);
+}
+
 if (!isset($_GET['fdcId']))
 {
-    echo "No food item specified.";
+    echo "<div class='alert alert-danger'> No food item specified. </div>";
     return;
 }
 
-// Get the fdcId from the URL parameter
+// Get the fdcId from the URL parameter and display the food details
 $fdcId = urlencode($_GET['fdcId']);
-
-// Construct the URL for the API request
-$url = buildApiUrl($fdcId);
-
-// Call the fetchDataFromAPI function to retrieve data from the API
-$data = fetchApiData($url);
-
-// Check if the response is null, indicating an error
-if ($data === null)
-{
-    echo "An error occurred while fetching data from the API.";
-    return;
-}
-
-// Check if the response contains the food item details
-if (!isset($data['description']))
-{
-    echo "No details found for this food item.";
-    return;
-}
-
-// Check if foodNutrients are present and not empty
-if (!isset($data['foodNutrients']) || !is_array($data['foodNutrients']) || count($data['foodNutrients']) === 0)
-{
-    echo "<p>No nutrient information available.</p>";
-    return;
-}
-
-// Display food details
-displayFoodDetails($data);
+fetchAndDisplayDetails($fdcId);
 
 ?>
