@@ -1,7 +1,5 @@
 <?php
-session_start();
 
-include '../bootstrap.html';
 include '../nav.php';
 include '../account_functions/check_loggin.php';
 include 'api.php';
@@ -88,7 +86,8 @@ $mealId = isset($_GET['meal_id']) ? $_GET['meal_id'] : null;
 
 if (!$mealId)
 {
-    echo "No meal specified.";
+    $_SESSION['error_message'] = "No meal specified.";
+    header("Location: meal_records.php");
     exit;
 }
 
@@ -96,7 +95,8 @@ $mealDetails = getMealDetails($conn, $mealId);
 
 if (!$mealDetails || empty($mealDetails['food_fdcId']))
 {
-    echo "Meal not found or no foods added to this meal yet.";
+    $_SESSION['error_message'] = "Meal not found or no foods added to this meal yet.";
+    header("Location: meal_records.php");
     exit;
 }
 
@@ -109,7 +109,7 @@ foreach ($foodFdcids as $fdcId)
 
     if ($foodData === null || !isset($foodData['description']))
     {
-        echo "Error fetching food details for FDC ID: $fdcId";
+        $_SESSION['error_message'] = "Error fetching food details for FDC ID: $fdcId";
         continue;
     }
 
@@ -172,6 +172,14 @@ $foodNames = array_column($foods, 'description'); // Extract food names
                 </tbody>
             </table>
         </div>
+
+        <!-- Display error message if set -->
+        <?php if (isset($_SESSION['error_message'])) : ?>
+            <div class="alert alert-danger">
+                <?= $_SESSION['error_message'] ?>
+            </div>
+            <?php unset($_SESSION['error_message']); ?>
+        <?php endif; ?>
 
     </div>
 </body>

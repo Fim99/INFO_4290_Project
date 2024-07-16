@@ -1,7 +1,4 @@
 <?php
-session_start();
-
-include '../bootstrap.html';
 include '../nav.php';
 include '../account_functions/check_loggin.php';
 include 'api.php';
@@ -95,6 +92,8 @@ function handleFormSubmissions($conn)
             elseif (addNewMeal($conn, $_SESSION['id'], $newMealName))
             {
                 $_SESSION['success_message'] = "Meal added successfully.";
+                // Update current meal name in session
+                $_SESSION['current_meal_name'] = $newMealName;
                 header("Location: " . $_SERVER['PHP_SELF']);
                 exit();
             }
@@ -107,6 +106,11 @@ function handleFormSubmissions($conn)
         if (isset($_POST['set_current_meal']))
         {
             $_SESSION['current_meal_id'] = $_POST['set_current_meal'];
+            // Update current meal name in session
+            $_SESSION['current_meal_name'] = getCurrentMealDetails($conn, $_SESSION['current_meal_id']);
+            $_SESSION['success_message'] = "Current meal selected successfully.";
+            header("Location: " . $_SERVER['PHP_SELF']);
+            exit();
         }
 
         if (isset($_POST['delete_meal']))
@@ -115,20 +119,32 @@ function handleFormSubmissions($conn)
             if (deleteMeal($conn, $mealId))
             {
                 $_SESSION['success_message'] = "Meal deleted successfully.";
+
+                // Check if the deleted meal was the current selected meal
+                if ($_SESSION['current_meal_id'] == $mealId)
+                {
+                    // Get the next most recent meal
+                    $meals = getUserMeals($conn, $_SESSION['id']);
+                    if (!empty($meals))
+                    {
+                        $_SESSION['current_meal_id'] = $meals[0]['id'];
+                        // Update current meal name in session
+                        $_SESSION['current_meal_name'] = $meals[0]['name'];
+                    }
+                    else
+                    {
+                        unset($_SESSION['current_meal_id']);
+                        unset($_SESSION['current_meal_name']);
+                    }
+                }
+
                 header("Location: " . $_SERVER['PHP_SELF']);
-                exit;
+                exit();
             }
             else
             {
                 $_SESSION['error_message'] = "Error deleting meal.";
             }
-        }
-
-        if (isset($_POST['delete_session']))
-        {
-            session_destroy();
-            header("Location: ../account_functions/login.php");
-            exit;
         }
     }
 }
@@ -139,6 +155,12 @@ handleFormSubmissions($conn);
 $userDetails = getUserDetails($conn, $_SESSION['id']);
 $meals = getUserMeals($conn, $_SESSION['id']);
 $currentMealName = isset($_SESSION['current_meal_id']) ? getCurrentMealDetails($conn, $_SESSION['current_meal_id']) : "None Selected";
+
+// Update current meal name in session initially
+if (isset($_SESSION['current_meal_id']))
+{
+    $_SESSION['current_meal_name'] = $currentMealName;
+}
 
 ?>
 
@@ -196,11 +218,6 @@ $currentMealName = isset($_SESSION['current_meal_id']) ? getCurrentMealDetails($
             <button type="submit" class="btn btn-success">Create Meal</button>
         </form>
 
-        <!-- Form to delete session -->
-        <form method="post">
-            <button type="submit" class="btn btn-danger" name="delete_session">Delete Session</button>
-        </form>
-
         <!-- Display table of meals -->
         <h2>Meals List</h2>
         <table class="table">
@@ -208,7 +225,7 @@ $currentMealName = isset($_SESSION['current_meal_id']) ? getCurrentMealDetails($
                 <tr>
                     <th>Meal Name</th>
                     <th>Date Created</th>
-                    <th>Action</th> <!-- New column for delete action -->
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>

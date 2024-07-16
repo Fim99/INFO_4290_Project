@@ -1,9 +1,8 @@
 <?php
-session_start();
 
-include 'api.php';
 include '../bootstrap.html';
 include '../nav.php';
+include 'api.php';
 
 // Database connection details
 $sql_servername = "localhost";
@@ -60,13 +59,20 @@ function displayFoodDetails($data)
     echo "</form>";
 }
 
-/// Function to handle adding FDC ID to the current meal
+// Function to handle adding FDC ID to the current meal
 function addFdcIdToMeal($conn)
 {
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['fdcId']))
     {
+        // Check if user is logged in
+        if (!isset($_SESSION['id']))
+        {
+            $_SESSION['error_message'] = "You must be logged in to add food to a meal.";
+            return;
+        }
+
         $fdcId = $conn->real_escape_string($_POST['fdcId']);
-        $currentMealId = $_SESSION['current_meal_id'];
+        $currentMealId = $_SESSION['current_meal_id'] ?? null;
 
         if (!isset($currentMealId))
         {
