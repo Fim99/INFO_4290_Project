@@ -20,26 +20,38 @@ if (isset($_POST['delete_session']))
 </head>
 
 <body>
-    <div class="navbar navbar-expand-lg navbar-light bg-light">
-        <div>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
             <a class="navbar-brand" href="index.php">Home</a>
             <a class="navbar-brand" href="meal_functions/meal_records.php">Meal Records</a>
-        </div>
-        <div class="navbar-nav ml-auto">
-            <?php if (isset($_SESSION['username'])): ?>
-                <form class="form-inline logout-form" method="post">
-                    <?php if (isset($_SESSION['current_meal_name'])): ?>
-                        <span class="mr-3 text-muted">Currently Selected Meal: <?php echo htmlspecialchars($_SESSION['current_meal_name']); ?></span>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto">
+                    <?php if (isset($_SESSION['username'])): ?>
+                        <?php if (isset($_SESSION['current_meal_name'])): ?>
+                            <li class="nav-item">
+                                <span class="nav-link text-muted">Currently Selected Meal: <?php echo htmlspecialchars($_SESSION['current_meal_name']); ?></span>
+                            </li>
+                        <?php endif; ?>
+                        <li class="nav-item">
+                            <span class="nav-link text-dark"><?php echo htmlspecialchars($_SESSION['username']); ?></span>
+                        </li>
+                        <li class="nav-item">
+                            <form class="d-inline" method="post">
+                                <button type="submit" name="delete_session" class="btn btn-danger">Logout</button>
+                            </form>
+                        </li>
+                    <?php else: ?>
+                        <li class="nav-item">
+                            <span class="nav-link text-dark">Guest</span>
+                        </li>
+                        <li class="nav-item">
+                            <a href="account_functions/login.php" class="btn btn-primary">Login</a>
+                        </li>
                     <?php endif; ?>
-                    <span class="user-info mr-3"><?php echo htmlspecialchars($_SESSION['username']); ?></span>
-                    <button type="submit" name="delete_session" class="btn btn-danger">Logout</button>
-                </form>
-            <?php else: ?>
-                <span class="user-info mr-3 align-self-center">Guest</span>
-                <a href="account_functions/login.php" class="btn btn-primary">Login</a>
-            <?php endif; ?>
+                </ul>
+            </div>
         </div>
-    </div>
+    </nav>
 </body>
 
 </html>
