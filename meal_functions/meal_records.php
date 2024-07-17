@@ -108,7 +108,7 @@ function handleFormSubmissions($conn)
             $_SESSION['current_meal_id'] = $_POST['set_current_meal'];
             // Update current meal name in session
             $_SESSION['current_meal_name'] = getCurrentMealDetails($conn, $_SESSION['current_meal_id']);
-            $_SESSION['success_message'] = "Current meal selected successfully.";
+            $_SESSION['success_message'] = "Current meal successfully changed.";
             header("Location: " . $_SERVER['PHP_SELF']);
             exit();
         }
