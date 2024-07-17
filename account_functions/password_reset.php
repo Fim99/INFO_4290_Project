@@ -12,11 +12,7 @@
         // Expire time for token in seconds
         $expire = date("U") + 900;  // 900 seconds = 15 minutes
        
-        // Create connection
-        $conn = new mysqli($sql_servername, $sql_username, $sql_password, $sql_dbname);
-        if ($conn->connect_error) {
-            die("Connection failed: " . $conn->connect_error);
-        }
+        include '../account_functions/db_connection.php';
 
         $userEmail = $_POST["email"];
 

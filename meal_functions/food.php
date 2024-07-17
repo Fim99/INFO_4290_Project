@@ -3,18 +3,7 @@
 include '../bootstrap.html';
 include '../nav.php';
 include 'api.php';
-
-// Database connection details
-$sql_servername = "localhost";
-$sql_username = "root";
-$sql_password = "";
-$sql_dbname = "nutritional_tracker";
-
-$conn = new mysqli($sql_servername, $sql_username, $sql_password, $sql_dbname);
-if ($conn->connect_error)
-{
-    die("Connection failed: " . $conn->connect_error);
-}
+include '../account_functions/db_connection.php';
 
 // Function to build the API URL for fetching food details
 function buildApiUrl($fdcId)
@@ -32,15 +21,39 @@ function fetchApiData($url)
 // Function to render food details
 function displayFoodDetails($data)
 {
+    echo "<div class='container mt-4'>";
+    echo "<div class='col-md-10 mx-auto'>"; // Centering and limiting width
+
+    // Form to add FDC ID to current meal
+    echo "<form method='post'>";
+    echo "<input type='hidden' name='fdcId' value='" . htmlspecialchars($data['fdcId'] ?? '---') . "'>";
+    echo "<button type='submit' class='btn btn-primary'>Add to Current Meal</button>";
+    echo "</form>";
+
+    echo "<hr>";
     echo "<h1>" . htmlspecialchars($data['description'] ?? '---') . "</h1>";
     echo "<p>FDC ID: " . htmlspecialchars($data['fdcId'] ?? '---') . "</p>";
     echo "<p>Data Type: " . htmlspecialchars($data['dataType'] ?? '---') . "</p>";
+    echo "<hr>";
+
+    // Display ingredients if available
+    if (isset($data['ingredients']) && !empty($data['ingredients']))
+    {
+        echo "<h2>Ingredients</h2>";
+        echo "<p>" . htmlspecialchars($data['ingredients']) . "</p>";
+        echo "<hr>";
+    }
+    else
+    {
+        echo "<h2>Ingredients</h2>";
+        echo "<p>No ingredients available.</p>";
+    }
 
     // Display nutrients in a table
     echo "<h2>Food Nutrients</h2>";
-    echo "<div class='col-md-3'>";
-    echo "<table class='table'>";
-    echo "<tr><th>Nutrient Name</th><th>Amount</th><th>Unit</th></tr>";
+    echo "<div class='col-md-12'>";
+    echo "<table class='table table-striped'>";
+    echo "<tr><th class='col-5'>Nutrient Name</th><th class='col-3'>Amount</th><th class='col-1'>Unit</th></tr>";
     foreach ($data['foodNutrients'] as $nutrient)
     {
         echo "<tr>";
@@ -52,11 +65,8 @@ function displayFoodDetails($data)
     echo "</table>";
     echo "</div>";
 
-    // Form to add FDC ID to current meal
-    echo "<form method='post'>";
-    echo "<input type='hidden' name='fdcId' value='" . htmlspecialchars($data['fdcId'] ?? '---') . "'>";
-    echo "<button type='submit' class='btn btn-primary'>Add to Current Meal</button>";
-    echo "</form>";
+    echo "</div>";
+    echo "</div>";
 }
 
 // Function to handle adding FDC ID to the current meal

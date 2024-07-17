@@ -43,17 +43,7 @@
 		echo "<p class='text-center mb-0' style='color:#e00000'>" . $string .  "</p>";
 	}
 
-	$sql_servername = "localhost";
-	$sql_username = "root";
-	$sql_password = "";
-	$sql_dbname = "nutritional_tracker";
-
-	// Create connection
-	$conn = new mysqli($sql_servername, $sql_username, $sql_password, $sql_dbname);
-	// Check connection
-	if ($conn->connect_error) {
-		die("Connection failed: " . $conn->connect_error);
-	}
+	 include '../account_functions/db_connection.php';
 
 	$valid_input = false;
 

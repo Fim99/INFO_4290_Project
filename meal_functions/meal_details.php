@@ -3,19 +3,7 @@
 include '../nav.php';
 include '../account_functions/check_loggin.php';
 include 'api.php';
-
-// Database connection details
-$sql_servername = "localhost";
-$sql_username = "root";
-$sql_password = "";
-$sql_dbname = "nutritional_tracker";
-
-// Create database connection
-$conn = new mysqli($sql_servername, $sql_username, $sql_password, $sql_dbname);
-if ($conn->connect_error)
-{
-    die("Connection failed: " . $conn->connect_error);
-}
+include '../account_functions/db_connection.php';
 
 // Function to build API URL
 function buildApiUrl($fdcId)
@@ -81,6 +69,35 @@ function getMealDetails($conn, $mealId)
     return $result->fetch_assoc();
 }
 
+// Function to remove a food from the meal
+function removeFromMeal($conn, $mealId, $fdcId)
+{
+    $sql = "SELECT food_fdcId FROM meals WHERE id = $mealId";
+    $result = $conn->query($sql);
+
+    if (!$result || $result->num_rows === 0)
+    {
+        return false; // Meal not found
+    }
+
+    $row = $result->fetch_assoc();
+    $foodFdcIds = json_decode($row['food_fdcId'], true);
+
+    // Find and remove the food FDC ID from the array
+    $key = array_search($fdcId, $foodFdcIds);
+    if ($key !== false)
+    {
+        unset($foodFdcIds[$key]);
+    }
+
+    // Update the meal record with the modified food list
+    $updatedFoodFdcIds = json_encode(array_values($foodFdcIds));
+    $updateSql = "UPDATE meals SET food_fdcId = '$updatedFoodFdcIds' WHERE id = $mealId";
+    $updateResult = $conn->query($updateSql);
+
+    return $updateResult;
+}
+
 // ------ MAIN CODE START WHERE METHODS ARE CALLED -------
 $mealId = isset($_GET['meal_id']) ? $_GET['meal_id'] : null;
 
@@ -121,7 +138,35 @@ $totalNutrients = sumNutrients($foods);
 // Variables for display
 $mealName = htmlspecialchars($mealDetails['name']);
 $mealCreatedAt = htmlspecialchars($mealDetails['created_at']);
-$foodNames = array_column($foods, 'description'); // Extract food names
+$foodDetails = []; // Array to hold food details for table
+
+// Prepare food details for table
+foreach ($foods as $food)
+{
+    $foodDetails[] = [
+        'fdcId' => $food['fdcId'],
+        'name' => htmlspecialchars($food['description']),
+        'category' => htmlspecialchars($food['dataType'])
+    ];
+}
+
+// Check if a remove action is requested
+if (isset($_POST['remove_fdc_id']))
+{
+    $removeFdcId = $_POST['remove_fdc_id'];
+    $removeResult = removeFromMeal($conn, $mealId, $removeFdcId);
+    if ($removeResult)
+    {
+        $_SESSION['success_message'] = "Food removed successfully from the meal.";
+        // Redirect to refresh the page and prevent form resubmission
+        header("Location: meal_details.php?meal_id=$mealId");
+        exit;
+    }
+    else
+    {
+        $_SESSION['error_message'] = "Failed to remove food from the meal.";
+    }
+}
 
 ?>
 
@@ -136,52 +181,81 @@ $foodNames = array_column($foods, 'description'); // Extract food names
 </head>
 
 <body>
-    <div class="container">
-        <h1>Meal Details: <?= $mealName ?></h1>
-        <p>Created on: <?= $mealCreatedAt ?></p>
-        <p>Food Items:</p>
-        <ul>
-            <?php foreach ($foodNames as $foodName) : ?>
-                <li><?= htmlspecialchars($foodName) ?></li>
-            <?php endforeach; ?>
-        </ul>
-        <hr>
+    <div class="container mt-4">
+        <div class="col-md-10 mx-auto">
+            <a href="meal_functions/meal_records.php" class="btn btn-secondary">Back to Meal Records</a>
+            <hr>
+            <h1>Meal Details: <?= $mealName ?></h1>
+            <p>Created on: <?= $mealCreatedAt ?></p>
 
-        <!-- Display back link -->
-        <a href="meal_functions/meal_records.php" class="btn btn-secondary mb-3">Back to Meal Records</a>
+            <!-- Display success or error message if set -->
+            <?php if (isset($_SESSION['success_message'])) : ?>
+                <div class="alert alert-success">
+                    <?= $_SESSION['success_message'] ?>
+                </div>
+                <?php unset($_SESSION['success_message']); ?>
+            <?php elseif (isset($_SESSION['error_message'])) : ?>
+                <div class="alert alert-danger">
+                    <?= $_SESSION['error_message'] ?>
+                </div>
+                <?php unset($_SESSION['error_message']); ?>
+            <?php endif; ?>
 
-        <!-- Display total nutrients table -->
-        <div id="totalNutrients">
-            <h2>Total Nutrients</h2>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Nutrient Name</th>
-                        <th>Total Amount</th>
-                        <th>Unit</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($totalNutrients as $nutrient) : ?>
+            <!-- Display food items in a table -->
+            <div id="foodItems">
+                <h2>Food Items</h2>
+                <table class="table">
+                    <thead>
                         <tr>
-                            <td><?= htmlspecialchars($nutrient['name']) ?></td>
-                            <td><?= htmlspecialchars($nutrient['amount']) ?></td>
-                            <td><?= htmlspecialchars($nutrient['unitName']) ?></td>
+                            <th class="col-5">Food Name</th>
+                            <th class="col-3">Category</th>
+                            <th class="col-1">Action</th>
                         </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Display error message if set -->
-        <?php if (isset($_SESSION['error_message'])) : ?>
-            <div class="alert alert-danger">
-                <?= $_SESSION['error_message'] ?>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($foodDetails as $food) : ?>
+                            <tr>
+                                <td><a href="meal_functions/food.php?fdcId=<?= $food['fdcId'] ?>"><?= $food['name'] ?></a>
+                                </td>
+                                <td><?= $food['category'] ?></td>
+                                <td>
+                                    <form method="post" action="">
+                                        <input type="hidden" name="remove_fdc_id" value="<?= $food['fdcId'] ?>">
+                                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
             </div>
-            <?php unset($_SESSION['error_message']); ?>
-        <?php endif; ?>
 
-    </div>
+            <hr>
+
+            <!-- Display total nutrients table -->
+            <div id="totalNutrients">
+                <h2>Total Nutrients</h2>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th class="col-5">Nutrient Name</th>
+                            <th class="col-3">Total Amount</th>
+                            <th class="col-1">Unit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($totalNutrients as $nutrient) : ?>
+                            <tr>
+                                <td><?= htmlspecialchars($nutrient['name']) ?></td>
+                                <td><?= htmlspecialchars($nutrient['amount']) ?></td>
+                                <td><?= htmlspecialchars($nutrient['unitName']) ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            </div">
+        </div>
 </body>
 
 </html>

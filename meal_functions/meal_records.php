@@ -2,19 +2,7 @@
 include '../nav.php';
 include '../account_functions/check_loggin.php';
 include 'api.php';
-
-// Database connection details
-$sql_servername = "localhost";
-$sql_username = "root";
-$sql_password = "";
-$sql_dbname = "nutritional_tracker";
-
-// Create database connection
-$conn = new mysqli($sql_servername, $sql_username, $sql_password, $sql_dbname);
-if ($conn->connect_error)
-{
-    die("Connection failed: " . $conn->connect_error);
-}
+include '../account_functions/db_connection.php';
 
 // Function to get user details by user ID
 function getUserDetails($conn, $user_id)
@@ -175,76 +163,67 @@ if (isset($_SESSION['current_meal_id']))
 </head>
 
 <body>
-    <div class="container">
-        <h1>Meal Records</h1>
+    <div class="container mt-4">
+        <div class="col-md-10 mx-auto">
+            <h1>Meal Records</h1>
 
-        <!-- Display success message if set -->
-        <?php if (isset($_SESSION['success_message'])) : ?>
-            <div class="alert alert-success"><?= $_SESSION['success_message'] ?></div>
-            <?php unset($_SESSION['success_message']); ?>
-        <?php endif; ?>
+            <!-- Display success message if set -->
+            <?php if (isset($_SESSION['success_message'])) : ?>
+                <div class="alert alert-success"><?= $_SESSION['success_message'] ?></div>
+                <?php unset($_SESSION['success_message']); ?>
+            <?php endif; ?>
 
-        <!-- Display error message if set -->
-        <?php if (isset($_SESSION['error_message'])) : ?>
-            <div class="alert alert-danger"><?= $_SESSION['error_message'] ?></div>
-            <?php unset($_SESSION['error_message']); ?>
-        <?php endif; ?>
+            <!-- Display error message if set -->
+            <?php if (isset($_SESSION['error_message'])) : ?>
+                <div class="alert alert-danger"><?= $_SESSION['error_message'] ?></div>
+                <?php unset($_SESSION['error_message']); ?>
+            <?php endif; ?>
 
-        <!-- Form to set current meal -->
-        <form method="post">
-            <div class="form-group">
-                <label for="setCurrentMeal">Select Meal to Modify (Currently:
-                    <?php echo htmlspecialchars($currentMealName); ?>)</label>
-                <select class="form-control" id="setCurrentMeal" name="set_current_meal">
-                    <?php foreach ($meals as $meal) : ?>
-                        <option value="<?= htmlspecialchars($meal['id']) ?>" <?= ($_SESSION['current_meal_id'] == $meal['id']) ? 'selected' : '' ?>>
-                            <?= htmlspecialchars($meal['name']) ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <button type="submit" class="btn btn-primary">Set Current Meal</button>
-        </form>
+            <!-- Form to create new meal -->
+            <form method="post">
+                <div class="form-group col-md-4">
+                    <label for="newMealName">Create New Meal</label>
+                    <input type="text" class="form-control" id="newMealName" name="new_meal_name"
+                        placeholder="Enter meal name">
+                </div>
+                <button type="submit" class="btn btn-success mt-2">Create Meal</button>
+            </form>
+            <hr>
 
-        <hr>
-
-        <!-- Form to create new meal -->
-        <form method="post">
-            <div class="form-group">
-                <label for="newMealName">Create New Meal</label>
-                <input type="text" class="form-control" id="newMealName" name="new_meal_name"
-                    placeholder="Enter meal name">
-            </div>
-            <button type="submit" class="btn btn-success">Create Meal</button>
-        </form>
-
-        <!-- Display table of meals -->
-        <h2>Meals List</h2>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Meal Name</th>
-                    <th>Date Created</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($meals as $meal) : ?>
+            <!-- Display table of meals -->
+            <h2 class="mt-4">Meals List</h2>
+            <table class="table">
+                <thead>
                     <tr>
-                        <td><a
-                                href="meal_functions/meal_details.php?meal_id=<?= htmlspecialchars($meal['id']) ?>"><?= htmlspecialchars($meal['name']) ?></a>
-                        </td>
-                        <td><?= htmlspecialchars($meal['created_at']) ?></td>
-                        <td>
-                            <form method="post" onsubmit="return confirm('Are you sure you want to delete this meal?');">
-                                <input type="hidden" name="delete_meal" value="<?= htmlspecialchars($meal['id']) ?>">
-                                <button type="submit" class="btn btn-danger">Delete</button>
-                            </form>
-                        </td>
+                        <th>Meal Name</th>
+                        <th>Date Created</th>
+                        <th >Action</th>
                     </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    <?php foreach ($meals as $meal) : ?>
+                        <tr>
+                            <td><a
+                                    href="meal_functions/meal_details.php?meal_id=<?= htmlspecialchars($meal['id']) ?>"><?= htmlspecialchars($meal['name']) ?></a>
+                            </td>
+                            <td><?= htmlspecialchars($meal['created_at']) ?></td>
+                            <td>
+                                <form class="d-inline-block" method="post">
+                                    <input type="hidden" name="set_current_meal"
+                                        value="<?= htmlspecialchars($meal['id']) ?>">
+                                    <button type="submit" class="btn btn-primary">Set as Current Meal</button>
+                                </form>
+                                <form class="d-inline-block" method="post"
+                                    onsubmit="return confirm('Are you sure you want to delete this meal?');">
+                                    <input type="hidden" name="delete_meal" value="<?= htmlspecialchars($meal['id']) ?>">
+                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
 </body>
 

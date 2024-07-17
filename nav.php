@@ -22,7 +22,7 @@ if (isset($_POST['delete_session']))
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container-fluid">
-            <a class="navbar-brand" href="index.php">Home</a>
+            <a class="navbar-brand" href="index.php">Search</a>
             <a class="navbar-brand" href="meal_functions/meal_records.php">Meal Records</a>
             <div class="collapse navbar-collapse">
                 <ul class="navbar-nav ms-auto">

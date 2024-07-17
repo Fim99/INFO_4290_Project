@@ -1,5 +1,6 @@
 <?php
 include 'api.php';
+include 'account_functions/db_connection.php';
 
 // Function to get additional parameters from the URL
 function getAdditionalParams($params)
@@ -42,22 +43,22 @@ function getTableHeaders($dataType)
     switch ($dataType)
     {
         case 'Branded':
-            return ['Description', 'FDC ID', 'Food Category', 'Brand Owner', 'Brand', 'Market Country'];
+            return ['Description', 'FDC ID', 'Food Category', 'Brand Owner', 'Brand', 'Market Country', '<div class="text-center">Add To Meal</div>'];
         case 'Foundation':
-            return ['Description', 'FDC ID', 'Most Recent Acquisition', 'SR/ Foundation Category'];
+            return ['Description', 'FDC ID', 'Most Recent Acquisition', 'SR/ Foundation Category', '<div class="text-center">Add To Meal</div>'];
         case 'Survey (FNDDS)':
-            return ['Description', 'FDC ID', 'Additional Food Description', 'WWEIA Food Category'];
+            return ['Description', 'FDC ID', 'Additional Food Description', 'WWEIA Food Category', '<div class="text-center">Add To Meal</div>'];
         case 'SR Legacy':
-            return ['Description', 'FDC ID', 'SR Food Category'];
+            return ['Description', 'FDC ID', 'SR Food Category', '<div class="text-center">Add To Meal</div>'];
         default:
-            return ['Description', 'FDC ID']; // Default headers
+            return ['Description', 'FDC ID', '<div class="text-center">Add To Meal</div>']; // Default headers
     }
 }
 
 // Function to render table rows based on dataType
 function displayTableRow($food, $dataType)
 {
-    // Concatenate  HTML to variable to be returned
+    // Concatenate HTML to variable to be returned
     $html = "<tr>";
     $html .= "<td><a href='meal_functions/food.php?fdcId=" . urlencode($food['fdcId']) . "'>" . (empty($food['description']) ? "---" : htmlspecialchars($food['description'])) . "</a></td>";
     $html .= "<td>" . (empty($food['fdcId']) ? "---" : htmlspecialchars($food['fdcId'])) . "</td>";
@@ -83,8 +84,67 @@ function displayTableRow($food, $dataType)
             break;
     }
 
+    // Add the "Add to Meal" form in the last column
+    $html .= "<td class='text-center'><form method='post'>";
+    $html .= "<input type='hidden' name='fdcId' value='" . htmlspecialchars($food['fdcId'] ?? '---') . "'>";
+    $html .= "<button type='submit' name='addToMeal' class='btn btn-primary btn-sm center'>+</button>";
+    $html .= "</form></td>";
+
     $html .= "</tr>";
     return $html;
+}
+
+// Function to handle adding FDC ID to the current meal
+function addFdcIdToMeal($conn)
+{
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['fdcId']) && isset($_POST['addToMeal']))
+    {
+        // Check if user is logged in
+        if (!isset($_SESSION['id']))
+        {
+            $_SESSION['error_message'] = "You must be logged in to add food to a meal.";
+            return;
+        }
+
+        $fdcId = $conn->real_escape_string($_POST['fdcId']);
+        $currentMealId = $_SESSION['current_meal_id'] ?? null;
+
+        if (!isset($currentMealId))
+        {
+            $_SESSION['error_message'] = "No current meal selected.";
+            return;
+        }
+
+        // Fetch the current food_fdcid from the database
+        $sql = "SELECT food_fdcid FROM meals WHERE id = $currentMealId";
+        $result = $conn->query($sql);
+
+        if ($result && $result->num_rows > 0)
+        {
+            $row = $result->fetch_assoc();
+            $currentFoodFdcid = json_decode($row['food_fdcid'], true);
+
+            // Add the new FDC ID to the existing array
+            $currentFoodFdcid[] = $fdcId;
+
+            // Update the database with the new array
+            $newFoodFdcidJson = json_encode($currentFoodFdcid);
+            $sqlUpdate = "UPDATE meals SET food_fdcid = '$newFoodFdcidJson' WHERE id = $currentMealId";
+
+            if ($conn->query($sqlUpdate) === TRUE)
+            {
+                $_SESSION['success_message'] = "Food added to the current meal.";
+            }
+            else
+            {
+                $_SESSION['error_message'] = "Error updating meal: " . $conn->error;
+            }
+        }
+        else
+        {
+            $_SESSION['error_message'] = "Current meal not found.";
+        }
+    }
 }
 
 // ------ MAIN CODE START WHERE METHODS ARE CALLED -------
@@ -125,6 +185,23 @@ if (empty($data['foods']))
 {
     echo "No results found.";
     return;
+}
+
+// Handle adding FDC ID to the meal
+addFdcIdToMeal($conn);
+
+// Display success message if set
+if (isset($_SESSION['success_message']))
+{
+    echo "<div class='alert alert-success'>" . $_SESSION['success_message'] . "</div>";
+    unset($_SESSION['success_message']);
+}
+
+// Display error message if set
+if (isset($_SESSION['error_message']))
+{
+    echo "<div class='alert alert-danger'>" . $_SESSION['error_message'] . "</div>";
+    unset($_SESSION['error_message']);
 }
 
 // Display the results in a table
