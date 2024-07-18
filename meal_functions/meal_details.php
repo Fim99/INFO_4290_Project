@@ -185,7 +185,7 @@ if (isset($_POST['remove_fdc_id']))
         <div class="col-md-10 mx-auto">
             <a href="meal_functions/meal_records.php" class="btn btn-secondary">Back to Meal Records</a>
             <hr>
-            <h1>Meal Details: <?= $mealName ?></h1>
+            <h1><?= $mealName ?></h1>
             <p>Created on: <?= $mealCreatedAt ?></p>
 
             <!-- Display success or error message if set -->
