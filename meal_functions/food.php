@@ -157,28 +157,44 @@ function fetchAndDisplayDetails($fdcId)
 // Handle form submission
 addFdcIdToMeal($conn);
 
-// Display success message if set
-if (isset($_SESSION['success_message']))
-{
-    echo "<div class='alert alert-success'>" . $_SESSION['success_message'] . "</div>";
-    unset($_SESSION['success_message']);
-}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meal Records</title>
+    <?php include '../bootstrap.html'; ?>
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="col-md-10 mx-auto">
+            <?php
+            // Display success message if set
+            if (isset($_SESSION['success_message'])) {
+                echo "<div class='alert alert-success'>" . $_SESSION['success_message'] . "</div>";
+                unset($_SESSION['success_message']);
+            }
 
-// Display error message if set
-if (isset($_SESSION['error_message']))
-{
-    echo "<div class='alert alert-danger'>" . $_SESSION['error_message'] . "</div>";
-    unset($_SESSION['error_message']);
-}
+            // Display error message if set
+            if (isset($_SESSION['error_message'])) {
+                echo "<div class='alert alert-danger'>" . $_SESSION['error_message'] . "</div>";
+                unset($_SESSION['error_message']);
+            }
 
-if (!isset($_GET['fdcId']))
-{
-    echo "<div class='alert alert-danger'> No food item specified. </div>";
-    return;
-}
+            // Check if food item is specified
+            if (!isset($_GET['fdcId'])) {
+                echo "<div class='alert alert-danger'>No food item specified.</div>";
+                return;
+            }
+            ?>
+        </div>
+    </div>
+</body>
+</html>
 
+<?php
 // Get the fdcId from the URL parameter and display the food details
 $fdcId = urlencode($_GET['fdcId']);
 fetchAndDisplayDetails($fdcId);
-
 ?>

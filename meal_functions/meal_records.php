@@ -223,7 +223,7 @@ if (isset($_SESSION['current_meal_id'])) {
                     <div class="col-md-4">
                         <div class="form-group">
                             <label for="newMealName">Create New Meal</label>
-                            <input type="text" class="form-control" id="newMealName" name="new_meal_name"
+                            <input type="text" class="form-control" id="newMealName" maxlength="50" name="new_meal_name"
                                 placeholder="Enter meal name">
                         </div>
                     </div>
@@ -239,7 +239,7 @@ if (isset($_SESSION['current_meal_id'])) {
                     <div class="col-md-4">
                         <div class="form-group">
                             <label for="updatedMealName">Rename Currently Selected Meal </label>
-                            <input type="text" class="form-control" id="updatedMealName" name="updated_meal_name"
+                            <input type="text" class="form-control" id="updatedMealName" maxlength="50" name="updated_meal_name"
                                 placeholder="Enter new meal name"
                                 value="<?= htmlspecialchars($_SESSION['current_meal_name']) ?? '' ?>">
                         </div>
@@ -257,9 +257,9 @@ if (isset($_SESSION['current_meal_id'])) {
             <table class="table">
                 <thead>
                     <tr>
-                        <th>Meal Name</th>
-                        <th>Date Created</th>
-                        <th>Action</th>
+                        <th class="col-2">Meal Name</th>
+                        <th class="col-1">Date Created</th>
+                        <th class="col-2">Action</th>
                     </tr>
                 </thead>
                 <tbody>
