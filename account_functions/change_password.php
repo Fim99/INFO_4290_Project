@@ -1,12 +1,14 @@
+<!-- Password change interface, accessed from account info page. Assumes user is logged in. -->
+
 <?php
 	session_start();
-
-	// To-Do: Verify user is logged in and redirect if not.
-
+	include '../account_functions/check_loggin.php';
+	include '../account_functions/db_connection.php';
 
 	// Keep track of failed password guesses.
 	if(!isset($_SESSION["password_change_attempts"]))
 		$_SESSION["password_change_attempts"] = 0;
+	const max_attempts = 5;
 ?>
 
 <!DOCTYPE html>
@@ -44,7 +46,10 @@
 		echo "<p class='text-center mb-0' style='color:#e00000'>" . $string .  "</p>";
 	}
 
-	include '../account_functions/db_connection.php';
+	function success_message($string)
+	{
+		echo "<p class='text-center mb-0' style='color:#008000'>" . $string .  "</p>";
+	}
 
 	if(isset($_POST["submit"]))
 	{
@@ -55,7 +60,6 @@
 		{
 			$valid_input = false;
 			error_message("'New Password' and 'Confirm New Password' inputs must match.");
-			$_SESSION["password_change_attempts"]++;
 		}
 
 		// Check if old password input is identical to new password input.
@@ -67,27 +71,45 @@
 
 
 		// To-Do: Verify new password meets minimum requirements.
+		
 
-
-
-		// To-Do: Compare hash of user-entered current password to the password hash in the database.
+		// Compare hash of user-entered current password to the password hash in the database.
 		// Keep track of failed password guesses here.
-		$password_hash = password_hash($_POST["old_password"], PASSWORD_DEFAULT);
-
-
-		// Log out the user after too many failed attempts.
-		if($_SESSION["password_change_attempts"] > 5 && $valid_input)
+		$result = $conn->query("SELECT * from users WHERE id = '$user_id'")->fetch_object();
+		if($valid_input && !password_verify($_POST["old_password"], $result->password))
 		{
 			$valid_input = false;
-			error_message("Too many failed password guesses.");
-
-			// To-Do: Handle log-out.
+			error_message("Incorrect password.");
+			$_SESSION["password_change_attempts"]++;
+			echo $_SESSION["password_change_attempts"];
 		}
 
 
-		// To-Do: If there are no errors, update password in database with new hash.
+		// Log out the user after too many failed attempts.
+		if($_SESSION["password_change_attempts"] > max_attempts)
+		{
+			error_message("Too many failed password guesses.");
+
+			// Handle log-out.
+			session_unset();
+			session_destroy();
+			
+			header('Refresh: 2; url=login.php');
+		}
 
 
-		// To-Do: Redirect back to account information page after successful password change.
+		// If there are no errors, update password in database with new hash.
+		if($valid_input)
+		{
+			$new_password_hash = password_hash($_POST["new_password"], PASSWORD_DEFAULT);
+			$conn->query("UPDATE users SET password = '$new_password_hash' WHERE id = '$user_id'");
+
+			// To-Do: Send email informing user that their password has changed.
+
+
+			// Redirect back to account information page after successful password change.
+			success_message("Your password has been changed successfully.");
+			header('Refresh: 2; url=account_information.php');
+		}
 	}
 ?>
