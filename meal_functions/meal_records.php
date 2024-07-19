@@ -19,8 +19,10 @@ function getUserMeals($conn, $user_id)
     $sql = "SELECT id, name, created_at FROM meals WHERE user_id = $user_id ORDER BY created_at DESC";
     $result = $conn->query($sql);
 
-    if ($result && $result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
+    if ($result && $result->num_rows > 0)
+    {
+        while ($row = $result->fetch_assoc())
+        {
             $meals[] = [
                 'id' => $row['id'],
                 'name' => $row['name'],
@@ -47,7 +49,8 @@ function addNewMeal($conn, $user_id, $meal_name)
     $created_at = date('Y-m-d H:i:s');
     $sql = "INSERT INTO meals (user_id, name, food_fdcid, created_at) VALUES ('$user_id', '$escaped_meal_name', '[]', '$created_at')";
 
-    if ($conn->query($sql) === TRUE) {
+    if ($conn->query($sql) === TRUE)
+    {
         $_SESSION['current_meal_id'] = $conn->insert_id;
         return true;
     }
@@ -70,7 +73,8 @@ function duplicateMeal($conn, $meal_id, $user_id)
     $sql = "SELECT name, food_fdcid FROM meals WHERE id = $meal_id";
     $result = $conn->query($sql);
 
-    if ($result && $result->num_rows > 0) {
+    if ($result && $result->num_rows > 0)
+    {
         $meal = $result->fetch_assoc();
         $meal_name = $meal['name'];
         $food_fdcid = $meal['food_fdcid'];
@@ -80,7 +84,8 @@ function duplicateMeal($conn, $meal_id, $user_id)
         $created_at = date('Y-m-d H:i:s');
         $sql = "INSERT INTO meals (user_id, name, food_fdcid, created_at) VALUES ('$user_id', '$escaped_meal_name', '$food_fdcid', '$created_at')";
 
-        if ($conn->query($sql) === TRUE) {
+        if ($conn->query($sql) === TRUE)
+        {
             $_SESSION['current_meal_id'] = $conn->insert_id;
             $_SESSION['current_meal_name'] = $meal_name; // Set current meal name
             return true;
@@ -100,22 +105,30 @@ function deleteMeal($conn, $meal_id)
 // Handle form submissions
 function handleFormSubmissions($conn)
 {
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        if (isset($_POST['new_meal_name'])) {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST')
+    {
+        if (isset($_POST['new_meal_name']))
+        {
             $newMealName = $_POST['new_meal_name'];
-            if (empty($newMealName)) {
+            if (empty($newMealName))
+            {
                 $_SESSION['error_message'] = "Meal name cannot be empty.";
-            } elseif (addNewMeal($conn, $_SESSION['id'], $newMealName)) {
+            }
+            elseif (addNewMeal($conn, $_SESSION['id'], $newMealName))
+            {
                 $_SESSION['success_message'] = "Meal added successfully.";
                 $_SESSION['current_meal_name'] = $newMealName; // Update current meal name in session
                 header("Location: " . $_SERVER['PHP_SELF']);
                 exit();
-            } else {
+            }
+            else
+            {
                 $_SESSION['error_message'] = "Error adding new meal.";
             }
         }
 
-        if (isset($_POST['set_current_meal'])) {
+        if (isset($_POST['set_current_meal']))
+        {
             $_SESSION['current_meal_id'] = $_POST['set_current_meal'];
             $_SESSION['current_meal_name'] = getCurrentMealDetails($conn, $_SESSION['current_meal_id']);
             $_SESSION['success_message'] = "Current meal changed successfully .";
@@ -123,17 +136,23 @@ function handleFormSubmissions($conn)
             exit();
         }
 
-        if (isset($_POST['delete_meal'])) {
+        if (isset($_POST['delete_meal']))
+        {
             $mealId = $_POST['delete_meal'];
-            if (deleteMeal($conn, $mealId)) {
+            if (deleteMeal($conn, $mealId))
+            {
                 $_SESSION['success_message'] = "Meal deleted successfully.";
 
-                if ($_SESSION['current_meal_id'] == $mealId) {
+                if ($_SESSION['current_meal_id'] == $mealId)
+                {
                     $meals = getUserMeals($conn, $_SESSION['id']);
-                    if (!empty($meals)) {
+                    if (!empty($meals))
+                    {
                         $_SESSION['current_meal_id'] = $meals[0]['id'];
                         $_SESSION['current_meal_name'] = $meals[0]['name'];
-                    } else {
+                    }
+                    else
+                    {
                         unset($_SESSION['current_meal_id']);
                         unset($_SESSION['current_meal_name']);
                     }
@@ -141,35 +160,48 @@ function handleFormSubmissions($conn)
 
                 header("Location: " . $_SERVER['PHP_SELF']);
                 exit();
-            } else {
+            }
+            else
+            {
                 $_SESSION['error_message'] = "Error deleting meal.";
             }
         }
 
-        if (isset($_POST['reuse_meal'])) {
+        if (isset($_POST['reuse_meal']))
+        {
             $mealId = $_POST['reuse_meal'];
-            if (duplicateMeal($conn, $mealId, $_SESSION['id'])) {
+            if (duplicateMeal($conn, $mealId, $_SESSION['id']))
+            {
                 $_SESSION['success_message'] = "Meal reused successfully.";
                 // Update current meal name in session after reusing meal
                 $_SESSION['current_meal_name'] = getCurrentMealDetails($conn, $_SESSION['current_meal_id']);
                 header("Location: " . $_SERVER['PHP_SELF']);
                 exit();
-            } else {
+            }
+            else
+            {
                 $_SESSION['error_message'] = "Error reusing meal.";
             }
         }
 
-        if (isset($_POST['update_meal_name'])) {
+        if (isset($_POST['update_meal_name']))
+        {
             $newMealName = $_POST['updated_meal_name'];
             $mealId = $_SESSION['current_meal_id'];
-            if (!empty($newMealName)) {
-                if (updateMealName($conn, $mealId, $newMealName)) {
+            if (!empty($newMealName))
+            {
+                if (updateMealName($conn, $mealId, $newMealName))
+                {
                     $_SESSION['success_message'] = "Meal name updated successfully.";
                     $_SESSION['current_meal_name'] = $newMealName; // Update current meal name in session
-                } else {
+                }
+                else
+                {
                     $_SESSION['error_message'] = "Error updating meal name.";
                 }
-            } else {
+            }
+            else
+            {
                 $_SESSION['error_message'] = "Meal name cannot be empty.";
             }
             header("Location: " . $_SERVER['PHP_SELF']);
@@ -185,7 +217,8 @@ $meals = getUserMeals($conn, $_SESSION['id']);
 $currentMealName = isset($_SESSION['current_meal_id']) ? getCurrentMealDetails($conn, $_SESSION['current_meal_id']) : "None Selected";
 
 // Update current meal name in session initially
-if (isset($_SESSION['current_meal_id'])) {
+if (isset($_SESSION['current_meal_id']))
+{
     $_SESSION['current_meal_name'] = $currentMealName;
 }
 
@@ -239,8 +272,8 @@ if (isset($_SESSION['current_meal_id'])) {
                     <div class="col-md-4">
                         <div class="form-group">
                             <label for="updatedMealName">Rename Currently Selected Meal </label>
-                            <input type="text" class="form-control" id="updatedMealName" maxlength="50" name="updated_meal_name"
-                                placeholder="Enter new meal name"
+                            <input type="text" class="form-control" id="updatedMealName" maxlength="50"
+                                name="updated_meal_name" placeholder="Enter new meal name"
                                 value="<?= htmlspecialchars($_SESSION['current_meal_name']) ?? '' ?>">
                         </div>
                     </div>

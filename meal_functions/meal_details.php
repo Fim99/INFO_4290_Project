@@ -6,9 +6,10 @@ include 'api.php';
 include '../account_functions/db_connection.php';
 
 // Function to build API URL
-function buildApiUrl($fdcId)
+function buildApiUrl($fdcIds)
 {
-    return "https://api.nal.usda.gov/fdc/v1/food/$fdcId?";
+    $ids = implode('&fdcIds=', $fdcIds);
+    return "https://api.nal.usda.gov/fdc/v1/foods?fdcIds=$ids";
 }
 
 // Function to fetch and decode API response
@@ -19,9 +20,9 @@ function fetchApiData($url)
 }
 
 // Function to fetch food details using API
-function fetchFoodDetails($fdcId)
+function fetchFoodDetails($fdcIds)
 {
-    $url = buildApiUrl($fdcId);
+    $url = buildApiUrl($fdcIds);
     $data = fetchApiData($url);
     return $data;
 }
@@ -118,19 +119,14 @@ if (!$mealDetails || empty($mealDetails['food_fdcId']))
 }
 
 $foodFdcids = json_decode($mealDetails['food_fdcId'], true);
-$foods = [];
 
-foreach ($foodFdcids as $fdcId)
+$foods = fetchFoodDetails($foodFdcids);
+
+if (is_null($foods) || !is_array($foods))
 {
-    $foodData = fetchFoodDetails($fdcId);
-
-    if ($foodData === null || !isset($foodData['description']))
-    {
-        $_SESSION['error_message'] = "Error fetching food details for FDC ID: $fdcId";
-        continue;
-    }
-
-    $foods[] = $foodData;
+    $_SESSION['error_message'] = "Error fetching food details.";
+    header("Location: meal_records.php");
+    exit;
 }
 
 $totalNutrients = sumNutrients($foods);
@@ -254,8 +250,8 @@ if (isset($_POST['remove_fdc_id']))
                     </tbody>
                 </table>
             </div>
-            </div">
         </div>
+    </div>
 </body>
 
 </html>
