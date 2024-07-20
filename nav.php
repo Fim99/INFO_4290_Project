@@ -29,11 +29,11 @@ if (isset($_POST['delete_session']))
                     <?php if (isset($_SESSION['username'])): ?>
                         <?php if (isset($_SESSION['current_meal_name'])): ?>
                             <li class="nav-item">
-                                <span class="nav-link text-light text-opacity-75">Currently Selected Meal: <?php echo htmlspecialchars($_SESSION['current_meal_name']); ?></span>
+                                <span class="nav-link text-light">Currently Selected Meal: <?php echo htmlspecialchars($_SESSION['current_meal_name']); ?></span>
                             </li>
                         <?php endif; ?>
                         <li class="nav-item">
-                            <span class="nav-link text-light"><?php echo htmlspecialchars($_SESSION['username']); ?></span>
+                            <span class="nav-link text-light fw-bold"><?php echo htmlspecialchars($_SESSION['username']); ?></span>
                         </li>
                         <li class="nav-item">
                             <form class="d-inline" method="post">
@@ -42,10 +42,10 @@ if (isset($_POST['delete_session']))
                         </li>
                     <?php else: ?>
                         <li class="nav-item">
-                            <span class="nav-link text-light">Guest</span>
+                            <span class="nav-link text-light fw-bold">Guest</span>
                         </li>
                         <li class="nav-item">
-                            <a href="account_functions/login.php" class="btn btn-primary">Login</a>
+                            <a href="account_functions/login.php" class="btn btn-success">Login</a>
                         </li>
                     <?php endif; ?>
                 </ul>
