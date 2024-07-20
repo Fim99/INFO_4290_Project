@@ -1,0 +1,29 @@
+:root 
+{
+    --bs-body-bg: #ffffff ;
+    --bs-primary: #5bafd6;
+    --bs-primary-bg-subtle: #70ff10;
+}
+
+.sidebar
+{
+    border-right: 1px solid #dee2e6;
+    padding-right: 20px;
+}
+
+.btn-primary 
+{
+    background-color: var(--bs-primary) !important;
+    border-color: var(--bs-primary) !important;
+}
+
+.table thead th 
+{
+    background-color: var(--bs-primary) !important;
+    color: #ffffff; 
+}
+
+.navbar 
+{
+    background-color: var(--bs-primary) !important;
+}

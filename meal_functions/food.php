@@ -1,6 +1,4 @@
 <?php
-
-include '../bootstrap.html';
 include '../nav.php';
 include 'api.php';
 include '../account_functions/db_connection.php';
@@ -32,15 +30,19 @@ function displayFoodDetails($data)
 
     echo "<hr>";
     echo "<h1>" . htmlspecialchars($data['description'] ?? '---') . "</h1>";
-    echo "<p>FDC ID: " . htmlspecialchars($data['fdcId'] ?? '---') . "</p>";
-    echo "<p>Data Type: " . htmlspecialchars($data['dataType'] ?? '---') . "</p>";
+    echo "<ul>";
+    echo "<li><strong>FDC ID: </strong>" . htmlspecialchars($data['fdcId'] ?? '---') . "</li>";
+    echo "<li><strong>Data Type: </strong>" . htmlspecialchars($data['dataType'] ?? '---') . "</li>";
+    echo "</ul>";
     echo "<hr>";
 
     // Display ingredients if available
     if (isset($data['ingredients']) && !empty($data['ingredients']))
     {
         echo "<h2>Ingredients</h2>";
-        echo "<p>" . htmlspecialchars($data['ingredients']) . "</p>";
+        echo "<ul>";
+        echo "<li>" . htmlspecialchars($data['ingredients']) . "</li>";
+        echo "</ul>";
         echo "<hr>";
     }
     else
@@ -53,7 +55,7 @@ function displayFoodDetails($data)
     echo "<h2>Food Nutrients</h2>";
     echo "<div class='col-md-12'>";
     echo "<table class='table table-striped'>";
-    echo "<tr><th class='col-5'>Nutrient Name</th><th class='col-3'>Amount</th><th class='col-1'>Unit</th></tr>";
+    echo "<thead><tr><th class='col-5'>Nutrient Name</th><th class='col-3'>Amount</th><th class='col-1'>Unit</th></tr></thead>";
     foreach ($data['foodNutrients'] as $nutrient)
     {
         echo "<tr>";

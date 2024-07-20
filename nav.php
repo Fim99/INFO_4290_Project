@@ -20,7 +20,7 @@ if (isset($_POST['delete_session']))
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
             <a class="navbar-brand" href="index.php">Search</a>
             <a class="navbar-brand" href="meal_functions/meal_records.php">Meal Records</a>
@@ -29,11 +29,11 @@ if (isset($_POST['delete_session']))
                     <?php if (isset($_SESSION['username'])): ?>
                         <?php if (isset($_SESSION['current_meal_name'])): ?>
                             <li class="nav-item">
-                                <span class="nav-link text-muted">Currently Selected Meal: <?php echo htmlspecialchars($_SESSION['current_meal_name']); ?></span>
+                                <span class="nav-link text-light text-opacity-75">Currently Selected Meal: <?php echo htmlspecialchars($_SESSION['current_meal_name']); ?></span>
                             </li>
                         <?php endif; ?>
                         <li class="nav-item">
-                            <span class="nav-link text-dark"><?php echo htmlspecialchars($_SESSION['username']); ?></span>
+                            <span class="nav-link text-light"><?php echo htmlspecialchars($_SESSION['username']); ?></span>
                         </li>
                         <li class="nav-item">
                             <form class="d-inline" method="post">
@@ -42,7 +42,7 @@ if (isset($_POST['delete_session']))
                         </li>
                     <?php else: ?>
                         <li class="nav-item">
-                            <span class="nav-link text-dark">Guest</span>
+                            <span class="nav-link text-light">Guest</span>
                         </li>
                         <li class="nav-item">
                             <a href="account_functions/login.php" class="btn btn-primary">Login</a>

@@ -9,12 +9,6 @@
     include 'bootstrap.html';
     include 'nav.php';
     ?>
-    <style>
-        .sidebar {
-            border-right: 1px solid #dee2e6;
-            padding-right: 20px;
-        }
-    </style>
 </head>
 
 <body>

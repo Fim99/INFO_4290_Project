@@ -5,6 +5,8 @@ include '../account_functions/check_loggin.php';
 include 'api.php';
 include '../account_functions/db_connection.php';
 
+include 'nutrients_array.php';
+
 // Function to build API URL
 function buildApiUrl($fdcIds)
 {
@@ -28,7 +30,14 @@ function fetchFoodDetails($fdcIds)
 }
 
 // Function to sum up nutrient values across all foods in a meal
-function sumNutrients($foods)
+function sumNutrients($foods, $selectedNutrientIds, $nutrientTypes)
+{
+    $totalNutrients = extractNutrientTotals($foods, $selectedNutrientIds);
+    return organizeNutrientsByType($totalNutrients, $nutrientTypes);
+}
+
+// Extracts and sums up nutrient values from food data
+function extractNutrientTotals($foods, $selectedNutrientIds)
 {
     $totalNutrients = [];
 
@@ -37,26 +46,52 @@ function sumNutrients($foods)
         foreach ($food['foodNutrients'] as $nutrient)
         {
             $nutrientId = $nutrient['nutrient']['id'];
-            $amount = isset($nutrient['amount']) ? $nutrient['amount'] : 0;
 
-            if (!isset($totalNutrients[$nutrientId]))
+            if (in_array($nutrientId, $selectedNutrientIds))
             {
-                $totalNutrients[$nutrientId] = [
-                    'name' => $nutrient['nutrient']['name'],
-                    'amount' => 0,
-                    'unitName' => $nutrient['nutrient']['unitName']
-                ];
-            }
+                $amount = $nutrient['amount'] ?? 0;
 
-            // Add the amount to the existing total
-            $totalNutrients[$nutrientId]['amount'] += $amount;
+                if (!isset($totalNutrients[$nutrientId]))
+                {
+                    $totalNutrients[$nutrientId] = [
+                        'name' => $nutrient['nutrient']['name'],
+                        'amount' => 0,
+                        'unitName' => $nutrient['nutrient']['unitName']
+                    ];
+                }
+
+                $totalNutrients[$nutrientId]['amount'] += $amount;
+            }
         }
     }
 
     return $totalNutrients;
 }
 
-// Function to retrieve meal details from database
+// Organizes nutrients into categories based on nutrient types
+function organizeNutrientsByType($totalNutrients, $nutrientTypes)
+{
+    $sortedNutrients = [];
+
+    foreach ($nutrientTypes as $type => $nutrients)
+    {
+        foreach ($nutrients as $name => $id)
+        {
+            if (isset($totalNutrients[$id]))
+            {
+                $sortedNutrients[$type][] = [
+                    'name' => $totalNutrients[$id]['name'],
+                    'amount' => $totalNutrients[$id]['amount'],
+                    'unitName' => $totalNutrients[$id]['unitName']
+                ];
+            }
+        }
+    }
+
+    return $sortedNutrients;
+}
+
+// Function to retrieve meal details from the database
 function getMealDetails($conn, $mealId)
 {
     $sql = "SELECT name, created_at, food_fdcId FROM meals WHERE id = $mealId";
@@ -129,14 +164,14 @@ if (is_null($foods) || !is_array($foods))
     exit;
 }
 
-$totalNutrients = sumNutrients($foods);
+$totalNutrients = sumNutrients($foods, $selectedNutrientIds, $nutrientTypes);
 
 // Variables for display
 $mealName = htmlspecialchars($mealDetails['name']);
 $mealCreatedAt = htmlspecialchars($mealDetails['created_at']);
-$foodDetails = []; // Array to hold food details for table
+$foodDetails = []; // Array to hold food details for the table
 
-// Prepare food details for table
+// Prepare food details for the table
 foreach ($foods as $food)
 {
     $foodDetails[] = [
@@ -165,7 +200,6 @@ if (isset($_POST['remove_fdc_id']))
 }
 
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -211,8 +245,7 @@ if (isset($_POST['remove_fdc_id']))
                     <tbody>
                         <?php foreach ($foodDetails as $food) : ?>
                             <tr>
-                                <td><a href="meal_functions/food.php?fdcId=<?= $food['fdcId'] ?>"><?= $food['name'] ?></a>
-                                </td>
+                                <td><a href="meal_functions/food.php?fdcId=<?= $food['fdcId'] ?>"><?= $food['name'] ?></a></td>
                                 <td><?= $food['category'] ?></td>
                                 <td>
                                     <form method="post" action="">
@@ -240,12 +273,18 @@ if (isset($_POST['remove_fdc_id']))
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($totalNutrients as $nutrient) : ?>
+                        <?php foreach ($totalNutrients as $type => $nutrients) : ?>
+                            <!-- Category Row -->
                             <tr>
-                                <td><?= htmlspecialchars($nutrient['name']) ?></td>
-                                <td><?= htmlspecialchars($nutrient['amount']) ?></td>
-                                <td><?= htmlspecialchars($nutrient['unitName']) ?></td>
+                                <td colspan="3"><strong><?= ucfirst($type) ?></strong></td>
                             </tr>
+                            <?php foreach ($nutrients as $nutrient) : ?>
+                                <tr>
+                                    <td><?= htmlspecialchars($nutrient['name']) ?></td>
+                                    <td><?= htmlspecialchars($nutrient['amount']) ?></td>
+                                    <td><?= htmlspecialchars($nutrient['unitName']) ?></td>
+                                </tr>
+                            <?php endforeach; ?>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
