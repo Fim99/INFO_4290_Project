@@ -279,7 +279,7 @@ if (isset($_SESSION['current_meal_id']))
                     </div>
                     <div class="col-md-4">
                         <button type="submit" name="update_meal_name"
-                            class="btn btn-primary btn-block mt-4">Rename</button>
+                            class="btn btn-secondary btn-block mt-4">Rename</button>
                     </div>
                 </div>
             </form>

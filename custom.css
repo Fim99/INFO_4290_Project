@@ -2,12 +2,28 @@
 {
     --bs-body-bg: #ffffff ;
     --bs-primary: #5bafd6;
-    --bs-primary-bg-subtle: #70ff10;
+    --bs-primary-bg-subtle: #95dcfd;
+}
+
+.faq-header 
+{
+    cursor: pointer;
+}
+
+.faq-header:hover 
+{
+    text-decoration: underline;
+}
+
+.accordion-button:not(.collapsed) 
+{
+    background-color: var(--bs-primary) !important;
+    color: white;
 }
 
 .sidebar
 {
-    border-right: 1px solid #dee2e6;
+    border-right: 1px solid #c5c5c5;
     padding-right: 20px;
 }
 

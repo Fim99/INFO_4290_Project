@@ -276,7 +276,7 @@ if (isset($_POST['remove_fdc_id']))
                         <?php foreach ($totalNutrients as $type => $nutrients) : ?>
                             <!-- Category Row -->
                             <tr>
-                                <td colspan="3"><strong><?= ucfirst($type) ?></strong></td>
+                            <td colspan="3" style="background-color: var(--bs-primary-bg-subtle); color: white;"><strong><?= ucfirst($type) ?></strong></td>
                             </tr>
                             <?php foreach ($nutrients as $nutrient) : ?>
                                 <tr>
