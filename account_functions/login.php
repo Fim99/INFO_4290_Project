@@ -28,8 +28,9 @@
             $hashed_password = $row["password"];
             if (password_verify($password, $hashed_password)) {
                 $_SESSION['success_message'] = "Login successful. Redirecting...";
-                include 'after_login.php'; 
-                header('Refresh: 2; url=../index.php'); // Redirect back to the index page after a few seconds.
+                include 'after_login.php';  // Include file for initializing session
+                $_SESSION['redirect'] = true; // Set a session variable to indicate redirection
+                header('Location: login.php');
                 exit();
             } else {
                 $_SESSION['error_message'] = "Password is incorrect.";
@@ -50,6 +51,13 @@
     <title>Login</title>
     <?php include '../bootstrap.html'; ?>
     <link href="../custom.css" rel="stylesheet">
+    <?php
+        // If redirection is set, add a meta refresh tag to the head
+        if (isset($_SESSION['redirect']) && $_SESSION['redirect']) {
+            echo '<meta http-equiv="refresh" content="2;url=../index.php">';
+            unset($_SESSION['redirect']);
+        }
+    ?>
 </head>
 
 <body>
