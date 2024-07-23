@@ -96,7 +96,7 @@
                     <a href="../account_functions/register.php" class="btn btn-secondary w-100" role="button" name="register" id="register">Register Here</a>
                 </div>
                 <div class="text-center">
-                    <a href='../account_functions/forgot_password.php'>Forgot Password?</a>
+                    <p>Forgot Password? <a href="forgot_password.php">Click here</a></p>
                 </div>
             </form>
         </div>

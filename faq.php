@@ -12,7 +12,8 @@
 <body>
     <div class="container mt-5">
         <h1 class="text-center mb-4">Frequently Asked Questions</h1>
-        <div class="accordion" id="faqAccordion">
+        <hr>
+        <div class="accordion mt-4" id="faqAccordion">
             <div class="accordion-item">
                 <h2 class="accordion-header faq-header" id="headingOne">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">

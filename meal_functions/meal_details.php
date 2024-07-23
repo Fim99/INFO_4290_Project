@@ -217,6 +217,7 @@ if (isset($_POST['remove_fdc_id']))
             <hr>
             <h1><?= $mealName ?></h1>
             <p>Created on: <?= $mealCreatedAt ?></p>
+            <hr>
 
             <!-- Display success or error message if set -->
             <?php if (isset($_SESSION['success_message'])) : ?>
@@ -276,7 +277,7 @@ if (isset($_POST['remove_fdc_id']))
                         <?php foreach ($totalNutrients as $type => $nutrients) : ?>
                             <!-- Category Row -->
                             <tr>
-                            <td colspan="3" style="background-color: var(--bs-primary-bg-subtle); color: white;"><strong><?= ucfirst($type) ?></strong></td>
+                            <td colspan="3" style="background-color: var(--bs-primary); color: white;"><strong><?= ucfirst($type) ?></strong></td>
                             </tr>
                             <?php foreach ($nutrients as $nutrient) : ?>
                                 <tr>

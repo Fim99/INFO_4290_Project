@@ -15,7 +15,8 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-lg-2 sidebar">
-                <h1>Food Search</h1>
+                <h1 class="mt-3">Food Search</h1>
+                <hr>
                 <form class="form" action="" method="get">
                     <div class="mb-3">
                         <input type="text" name="query" class="form-control" placeholder="Search for food..." value="<?php echo htmlspecialchars($_GET['query'] ?? ''); ?>">

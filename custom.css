@@ -2,7 +2,7 @@
 {
     --bs-body-bg: #ffffff ;
     --bs-primary: #5bafd6;
-    --bs-primary-bg-subtle: #95dcfd;
+    --bs-primary-bg-subtle: #2a6e8d;
 }
 
 .faq-header 
@@ -35,7 +35,7 @@
 
 .table thead th 
 {
-    background-color: var(--bs-primary) !important;
+    background-color: var(--bs-primary-bg-subtle) !important;
     color: #ffffff; 
 }
 

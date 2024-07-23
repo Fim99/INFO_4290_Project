@@ -124,7 +124,7 @@
                     </label>
                 </div>
                 <div class="form-group text-center mb-3">
-                    <button type="submit" name="submit" class="btn btn-primary w-100">Submit</button>
+                    <button type="submit" name="submit" class="btn btn-primary w-100">Register</button>
                 </div>
                 <div class="text-center">
                     <p>Already have an account? <a href="login.php">Click here</a></p>

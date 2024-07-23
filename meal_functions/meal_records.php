@@ -95,6 +95,41 @@ function duplicateMeal($conn, $meal_id, $user_id)
     return false;
 }
 
+function renderMealRecords($meals)
+{
+    $previousDay = '';
+
+    foreach ($meals as $meal)
+    {
+        $mealDate = new DateTime($meal['created_at']);
+        $currentDay = $mealDate->format('l, F j'); // Format: Day of the week, Month day
+
+        if ($currentDay !== $previousDay)
+        {
+            echo '<tr class="table fw-bold"><td colspan="2" style="background-color: var(--bs-primary); color: white;">' . $currentDay . '</td></tr>';
+            $previousDay = $currentDay;
+        }
+
+        $formattedDate = $mealDate->format('Y-m-d H:i:s');
+        echo '<tr>';
+        echo '<td><a href="meal_functions/meal_details.php?meal_id=' . htmlspecialchars($meal['id']) . '">' . htmlspecialchars($meal['name']) . '</a> <span class="text-muted">(' . $formattedDate . ')</span></td>';
+        echo '<td class="text-center col-3">
+                <form action="' . $_SERVER['PHP_SELF'] . '" method="POST" style="display:inline-block;">
+                    <button type="submit" name="set_current_meal" value="' . $meal['id'] . '" class="btn btn-primary">Select</button>
+                </form>
+                <form action="' . $_SERVER['PHP_SELF'] . '" method="POST" style="display:inline-block;">
+                    <button type="submit" name="delete_meal" value="' . $meal['id'] . '" class="btn btn-danger" onclick="return confirm(\'Are you sure you want to delete this meal?\')">Delete</button>
+                </form>
+                <form action="' . $_SERVER['PHP_SELF'] . '" method="POST" style="display:inline-block;">
+                    <button type="submit" name="reuse_meal" value="' . $meal['id'] . '" class="btn btn-success">Reuse</button>
+                </form>
+              </td>';
+        echo '</tr>';
+    }
+}
+
+
+
 // Function to delete a meal from the database
 function deleteMeal($conn, $meal_id)
 {
@@ -237,6 +272,7 @@ if (isset($_SESSION['current_meal_id']))
     <div class="container mt-4">
         <div class="col-md-10 mx-auto">
             <h1>Meal Records</h1>
+            <hr>
 
             <!-- Display success message if set -->
             <?php if (isset($_SESSION['success_message'])) : ?>
@@ -251,7 +287,7 @@ if (isset($_SESSION['current_meal_id']))
             <?php endif; ?>
 
             <!-- Form to create new meal -->
-            <form method="post" class="mb-4">
+            <form method="post" class="mb-3">
                 <div class="row">
                     <div class="col-md-4">
                         <div class="form-group">
@@ -283,43 +319,17 @@ if (isset($_SESSION['current_meal_id']))
                     </div>
                 </div>
             </form>
-            <hr>
 
-            <!-- Display table of meals -->
-            <h2 class="mt-4">Meals List</h2>
-            <table class="table">
+            <!-- Table to display meal records with day separators -->
+            <table class="table table-bordered">
                 <thead>
                     <tr>
-                        <th class="col-2">Meal Name</th>
-                        <th class="col-1">Date Created</th>
-                        <th class="col-2">Action</th>
+                        <th>Meal Name</th>
+                        <th class="text-center">Manage</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($meals as $meal) : ?>
-                        <tr>
-                            <td><a
-                                    href="meal_functions/meal_details.php?meal_id=<?= htmlspecialchars($meal['id']) ?>"><?= htmlspecialchars($meal['name']) ?></a>
-                            </td>
-                            <td><?= htmlspecialchars($meal['created_at']) ?></td>
-                            <td>
-                                <form class="d-inline-block" method="post">
-                                    <input type="hidden" name="set_current_meal"
-                                        value="<?= htmlspecialchars($meal['id']) ?>">
-                                    <button type="submit" class="btn btn-primary">Set as Current Meal</button>
-                                </form>
-                                <form class="d-inline-block" method="post"
-                                    onsubmit="return confirm('Are you sure you want to delete this meal?');">
-                                    <input type="hidden" name="delete_meal" value="<?= htmlspecialchars($meal['id']) ?>">
-                                    <button type="submit" class="btn btn-danger">Delete</button>
-                                </form>
-                                <form class="d-inline-block" method="post">
-                                    <input type="hidden" name="reuse_meal" value="<?= htmlspecialchars($meal['id']) ?>">
-                                    <button type="submit" class="btn btn-secondary">Reuse</button>
-                                </form>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
+                    <?php renderMealRecords($meals); // Call the function to render meal records ?>
                 </tbody>
             </table>
         </div>
