@@ -16,9 +16,40 @@ function fetchApiData($url)
     return $response ? json_decode($response, true) : null;
 }
 
-// Function to render food details
-function displayFoodDetails($data)
+// Function to fetch ingredient alerts from the database
+function getIngredientAlerts($conn, $user_id)
 {
+    $sql = "SELECT alerts FROM users WHERE id = $user_id";
+    $result = $conn->query($sql);
+
+    if ($result && $result->num_rows > 0)
+    {
+        $row = $result->fetch_assoc();
+        $alerts = json_decode($row['alerts'], true);
+        return is_array($alerts) ? array_map('trim', $alerts) : [];
+    }
+
+    return [];
+}
+
+// Function to highlight specific ingredients in red and ensure they are in uppercase
+function highlightIngredients($ingredients, $highlightedIngredients)
+{
+    $ingredients = strtoupper($ingredients);
+    foreach ($highlightedIngredients as $ingredient)
+    {
+        $ingredient = strtoupper($ingredient);
+        // Use preg_replace to replace all occurrences of the ingredient with the highlighted version
+        $ingredients = preg_replace('/(' . preg_quote($ingredient, '/') . ')/i', '<span class="highlight">$1</span>', $ingredients);
+    }
+    return $ingredients;
+}
+
+// Function to render food details
+function displayFoodDetails($data, $highlightedIngredients)
+{
+    global $conn; // Make sure the database connection is accessible here
+
     echo "<div class='container mt-4'>";
     echo "<div class='col-md-10 mx-auto'>"; // Centering and limiting width
 
@@ -40,8 +71,19 @@ function displayFoodDetails($data)
     if (isset($data['ingredients']) && !empty($data['ingredients']))
     {
         echo "<h2>Ingredients</h2>";
+        $ingredientsArray = explode(', ', $data['ingredients']); // Split ingredients by comma and space
         echo "<ul>";
-        echo "<li>" . htmlspecialchars($data['ingredients']) . "</li>";
+        foreach ($ingredientsArray as $ingredient)
+        {
+            $highlightedIngredient = highlightIngredients($ingredient, $highlightedIngredients);
+            // Create a form for each ingredient
+            echo "<li>";
+            echo "<form method='post' style='display:inline;'>";
+            echo "<input type='hidden' name='ingredient' value='" . htmlspecialchars($ingredient) . "'>";
+            echo "<button type='submit' class='btn btn-link'>$highlightedIngredient</button>";
+            echo "</form>";
+            echo "</li>";
+        }
         echo "</ul>";
         echo "<hr>";
     }
@@ -70,6 +112,7 @@ function displayFoodDetails($data)
     echo "</div>";
     echo "</div>";
 }
+
 
 // Function to handle adding FDC ID to the current meal
 function addFdcIdToMeal($conn)
@@ -127,8 +170,62 @@ function addFdcIdToMeal($conn)
     }
 }
 
+// Function to handle adding ingredients to alerts
+function addIngredientToAlerts($conn)
+{
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ingredient']))
+    {
+        // Check if user is logged in
+        if (!isset($_SESSION['id']))
+        {
+            $_SESSION['error_message'] = "You must be logged in to add ingredients to alerts.";
+            return;
+        }
+
+        $ingredient = $conn->real_escape_string(trim($_POST['ingredient']));
+        $user_id = $_SESSION['id'];
+
+        // Fetch the current alerts from the database
+        $sql = "SELECT alerts FROM users WHERE id = $user_id";
+        $result = $conn->query($sql);
+
+        if ($result && $result->num_rows > 0)
+        {
+            $row = $result->fetch_assoc();
+            $alerts = json_decode($row['alerts'], true);
+            $alerts = is_array($alerts) ? array_map('trim', $alerts) : [];
+
+            // Add the new ingredient to the alerts array
+            if (!in_array($ingredient, $alerts))
+            {
+                $alerts[] = $ingredient;
+                $alertsJson = json_encode($alerts);
+                $sqlUpdate = "UPDATE users SET alerts = '$alertsJson' WHERE id = $user_id";
+
+                if ($conn->query($sqlUpdate) === TRUE)
+                {
+                    $_SESSION['success_message'] = "Ingredient added to your alerts.";
+                }
+                else
+                {
+                    $_SESSION['error_message'] = "Error updating alerts: " . $conn->error;
+                }
+            }
+            else
+            {
+                $_SESSION['error_message'] = "Ingredient is already in your alerts.";
+            }
+        }
+        else
+        {
+            $_SESSION['error_message'] = "User not found.";
+        }
+    }
+}
+
+
 // Function to fetch and display food details
-function fetchAndDisplayDetails($fdcId)
+function fetchAndDisplayDetails($conn, $fdcId)
 {
     $url = buildApiUrl($fdcId);
     $data = fetchApiData($url);
@@ -151,52 +248,64 @@ function fetchAndDisplayDetails($fdcId)
         return;
     }
 
-    displayFoodDetails($data);
+    // Get ingredient alerts for the logged-in user
+    $highlightedIngredients = isset($_SESSION['id']) ? getIngredientAlerts($conn, $_SESSION['id']) : [];
+
+    displayFoodDetails($data, $highlightedIngredients);
 }
 
 // ------ MAIN CODE START WHERE METHODS ARE CALLED -------
 
-// Handle form submission
+// Handle form submission for adding FDC ID to current meal
 addFdcIdToMeal($conn);
+
+// Handle form submission for adding ingredient to alerts
+addIngredientToAlerts($conn);
+
+// Get the fdcId from the URL parameter
+$fdcId = isset($_GET['fdcId']) ? urlencode($_GET['fdcId']) : null;
 
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meal Records</title>
+    <title>Food Details</title>
     <?php include '../bootstrap.html'; ?>
 </head>
+
 <body>
     <div class="container mt-4">
         <div class="col-md-10 mx-auto">
             <?php
             // Display success message if set
-            if (isset($_SESSION['success_message'])) {
+            if (isset($_SESSION['success_message']))
+            {
                 echo "<div class='alert alert-success'>" . $_SESSION['success_message'] . "</div>";
                 unset($_SESSION['success_message']);
             }
 
             // Display error message if set
-            if (isset($_SESSION['error_message'])) {
+            if (isset($_SESSION['error_message']))
+            {
                 echo "<div class='alert alert-danger'>" . $_SESSION['error_message'] . "</div>";
                 unset($_SESSION['error_message']);
             }
 
             // Check if food item is specified
-            if (!isset($_GET['fdcId'])) {
+            if (!$fdcId)
+            {
                 echo "<div class='alert alert-danger'>No food item specified.</div>";
                 return;
             }
+
+            // Fetch and display food details
+            fetchAndDisplayDetails($conn, $fdcId);
             ?>
         </div>
     </div>
 </body>
-</html>
 
-<?php
-// Get the fdcId from the URL parameter and display the food details
-$fdcId = urlencode($_GET['fdcId']);
-fetchAndDisplayDetails($fdcId);
-?>
+</html>

@@ -36,10 +36,50 @@
 .table thead th 
 {
     background-color: var(--bs-primary-bg-subtle) !important;
-    color: #ffffff; 
+    color: white; 
 }
 
 .navbar 
 {
     background-color: var(--bs-primary) !important;
+}
+
+.nutrient-table .nutrient-cell 
+{
+    border-right: 1px solid #dee2e6;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.nutrient-table .nutrient-cell:last-child 
+{
+    border-right: none;
+}
+
+.nutrient-table tr:last-child .nutrient-cell 
+{
+    border-bottom: none;
+}
+
+.nutrient-table 
+{
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.nutrient-table th, .nutrient-table td 
+{
+    padding: 8px;
+    text-align: left;
+}
+
+.nutrient-table th 
+{
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.highlight 
+{
+    color: red;
+    font-weight: bold;
 }

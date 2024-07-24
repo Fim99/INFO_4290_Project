@@ -265,7 +265,7 @@ if (isset($_POST['remove_fdc_id']))
             <!-- Display total nutrients table -->
             <div id="totalNutrients">
                 <h2>Total Nutrients</h2>
-                <table class="table table-striped">
+                <table class="table table-striped nutrient-table">
                     <thead>
                         <tr>
                             <th class="col-5">Nutrient Name</th>
@@ -281,9 +281,9 @@ if (isset($_POST['remove_fdc_id']))
                             </tr>
                             <?php foreach ($nutrients as $nutrient) : ?>
                                 <tr>
-                                    <td><?= htmlspecialchars($nutrient['name']) ?></td>
-                                    <td><?= htmlspecialchars($nutrient['amount']) ?></td>
-                                    <td><?= htmlspecialchars($nutrient['unitName']) ?></td>
+                                    <td class="nutrient-cell"><?= htmlspecialchars($nutrient['name']) ?></td>
+                                    <td class="nutrient-cell"><?= htmlspecialchars($nutrient['amount']) ?></td>
+                                    <td class="nutrient-cell"><?= htmlspecialchars($nutrient['unitName']) ?></td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php endforeach; ?>
