@@ -1,4 +1,11 @@
 <?php
+    use PHPMailer\PHPMailer\PHPMailer;
+    use PHPMailer\PHPMailer\SMTP;
+    use PHPMailer\PHPMailer\Exception;
+
+    //Load Composer's autoloader
+    require '../vendor/autoload.php';
+
     session_start();
     include '../account_functions/db_connection.php';
 	function error_message($string)
@@ -62,10 +69,32 @@
         if ($valid_input) {
             $verification_code = rand(100000, 999999);
 
-            $to = $email;
+            $recieverEmail = $email;
+            $senderEmail = 'nutrition@mail.com';
             $subject = "Account verification for " . $username;
+            $name = 'NutritionWebApp';
             $txt = "Your verification code: " . $verification_code;
             $headers = "From: nutritional_tracker@test.com";
+
+            // Creating a mail service with PHP Mailer
+            $mail = new PHPMailer(true);
+            $mail->isSMTP();
+            $mail->SMTPAuth = true;
+            $mail->Host = 'smtp.gmail.com'; 
+
+            $mail->Username   = 'nutritionappproject@gmail.com';            //SMTP username
+            $mail->Password   = 'iobp nwut dpeg kyus';                      //SMTP password
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;             //Enable implicit TLS encryption
+            $mail->Port = 587; 
+
+            $mail->setFrom($senderEmail, $name);
+            $mail->addAddress($recieverEmail);
+
+            $mail->Subject = $subject;
+            $mail->Body = $txt;
+
+            $mail->send();
+            
             mail($to, $subject, $txt, $headers);
 
             $expires = time() + (5 * 60); // 5 minutes until code expires
