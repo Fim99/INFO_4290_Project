@@ -9,7 +9,7 @@
 
 <body>
     <h1>Account Recovery</h1>
-    <form name="account_recovery" method="post" action="">
+    <form name="account_recovery" method="post" action="password_reset.php">
         <div class="container-fluid pt-3">
             <div>
                 <h3>An email will be sent to the email entered below</h3>

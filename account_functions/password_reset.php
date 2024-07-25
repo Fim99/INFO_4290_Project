@@ -1,4 +1,11 @@
 <?php
+    use PHPMailer\PHPMailer\PHPMailer;
+    use PHPMailer\PHPMailer\SMTP;
+    use PHPMailer\PHPMailer\Exception;
+
+    //Load Composer's autoloader
+    require '../vendor/autoload.php';   
+
     // Check if user clicked on send code button to access this page
     // Redirect users to index page if not
     if (isset($_POST["password_reset_submit"])){
@@ -48,19 +55,38 @@
         mysqli_stmt_close($stmt);
         mysqli_close($conn);
 
+        // Configuring email inputs 
+        $senderEmail = 'nutrition@mail.com';
         $to = $userEmail;
+        $name = 'NutritionWebApp';
         $subject = "Password Reset Request for Nutrition App";
-        $message = "<p>A password reset has been requested on your account on Nutrition App. 
+        $txt = "<p>A password reset has been requested on your account on Nutrition App. 
         The link to reset your password is below. If you did not make this request, you can ignore this email.</p>";
-        $message .= "<p>Password Reset Link: <a href>$url</a></p>";
+        $txt .= "<p>Password Reset Link: <a href>$url</a></p>";
+
+        // Creating a mail service with PHP Mailer
+        $mail = new PHPMailer(true);
+        $mail->isSMTP();
+        $mail->SMTPAuth = true;
+        $mail->Host = 'smtp.gmail.com'; 
+
+        $mail->Username   = 'nutritionappproject@gmail.com';            //SMTP username
+        $mail->Password   = 'iobp nwut dpeg kyus';                      //SMTP password
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;             //Enable implicit TLS encryption
+        $mail->Port = 587;
+
+        $mail->setFrom($senderEmail, $name);
+        $mail->addAddress($to);
+
+        $mail->Subject = $subject;
+        $mail->Body = $txt;
 
         // Formatting for mail service
         $headers = "From: NutritionApp <nutritionappproject@gmail.com>\r\n";
         $headers .= "Reply-To: nutritionappproject@gmail.com\r\n";
         $headers .="Content-type: text/html\r\n";       // Use HTML in email
 
-        // Add mail details
-        mail($to, $subject, $message, $headers);
+        $mail->send();
 
         // Send user back to forgot password form with success message
         header("Location: ../account_functions/forgot_password.php?reset=success");
