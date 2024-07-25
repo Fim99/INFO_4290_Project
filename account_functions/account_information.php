@@ -1,7 +1,11 @@
 <?php
-	session_start();
+	include '../nav.php';
+	include '../account_functions/check_loggin.php';
+	include '../account_functions/db_connection.php';
 
-	// To-Do: Verify user is logged in and redirect if not.
+	$result = $conn->query("SELECT * from users WHERE id = '$user_id'")->fetch_object();
+	$email = $result->email;
+	$username = $result->username;
 ?>
 
 <!DOCTYPE html>
@@ -9,15 +13,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Account Information</title>
+    <title>Account Settings</title>
     <?php include '../bootstrap.html'?>
 </head>
 
 <body>
-	<h1>Account Information</h1>
-	<p>Email: <?php echo "placeholder@email.com" ?> <a href="../account_functions/login.php">Change</a><br> 
-	Username: <?php echo "place_holder" ?> <a href="../account_functions/login.php">Change</a> </p>
-	<p><a href="../account_functions/change_password.php">Change password</a></p>
+	<div class="container d-flex align-items-center justify-content-center" style="padding-top:5vh">
+		<div class="col-md-6" style="max-width: 400px">
+			<h1 class="text-center" style="">Account Settings</h1>
+			
+			<div class="form-group row mb-2">
+				<label class="col-form-label" style="padding-bottom:0"><b>Email&nbsp;&nbsp;</b><a href="account_functions/change_email.php">Change</a></label>
+					<input type="text" disabled class="form-control" value="<?php echo $email?>">
+			</div>
+
+			<div class="form-group row mb-4" >
+				<label class="col-form-label" style="padding-bottom:0"><b>Username&nbsp;&nbsp;</b><a href="account_functions/change_username.php">Change</a></label>
+					<input type="text" disabled class="form-control" value="<?php echo $username?>">
+			</div>
+			
+			<div class="text-center">
+				<button class="btn btn-secondary" onclick="location.href='account_functions/change_password.php'">Change Password</button>
+			</div>
+		</div>
+	</div>	
 </body>
 
 
