@@ -83,3 +83,19 @@
     color: red;
     font-weight: bold;
 }
+
+.ingredient-row 
+{
+    height: 30px; /* Adjust as needed */
+    font-size: 14px;
+}
+.ingredient-row td 
+{
+    padding: 4px; /* Adjust as needed */
+}
+
+.btn-primary 
+{
+    background-color: var(--bs-primary) !important;
+    border-color: var(--bs-primary) !important;
+}

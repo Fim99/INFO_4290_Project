@@ -24,6 +24,7 @@ if (isset($_POST['delete_session']))
         <div class="container-fluid">
             <a class="navbar-brand" href="index.php">Search</a>
             <a class="navbar-brand" href="meal_functions/meal_records.php">Meal Records</a>
+            <a class="navbar-brand" href="meal_functions/ingredient_alert.php">Ingredient Alert</a>
             <a class="navbar-brand" href="faq.php">FAQ / Support</a>
             <div class="collapse navbar-collapse">
                 <ul class="navbar-nav ms-auto">

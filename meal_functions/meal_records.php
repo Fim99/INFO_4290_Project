@@ -296,7 +296,7 @@ if (isset($_SESSION['current_meal_id']))
 <body>
     <div class="container mt-4">
         <div class="col-md-10 mx-auto">
-            <h1>Meal Records</h1>
+            <h1 class='display-5'>Meal Records</h1>
             <hr>
 
             <!-- Display success message if set -->

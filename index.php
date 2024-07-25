@@ -15,7 +15,7 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-lg-2 sidebar">
-                <h1 class="mt-3">Food Search</h1>
+                <h1 class="mt-3 display-6">Food Search</h1>
                 <hr>
                 <form class="form" action="" method="get">
                     <div class="mb-3">

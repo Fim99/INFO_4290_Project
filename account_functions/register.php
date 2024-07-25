@@ -125,7 +125,7 @@
 <body>
     <div class="container d-flex align-items-center justify-content-center" style="min-height: 80vh; padding-top: 5vh;">
         <div class="col-md-4">
-            <h1 class="text-center mb-4">Account Registration</h1>
+            <h1 class="text-center mb-4 display-6">Account Registration</h1>
             <hr>
             <?php
                 // Display error message if set

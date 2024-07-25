@@ -60,41 +60,46 @@ function displayFoodDetails($data, $highlightedIngredients)
     echo "</form>";
 
     echo "<hr>";
-    echo "<h1>" . htmlspecialchars($data['description'] ?? '---') . "</h1>";
+    echo "<h1 class='display-5'>" . htmlspecialchars($data['description'] ?? '---') . "</h1>";
     echo "<ul>";
     echo "<li><strong>FDC ID: </strong>" . htmlspecialchars($data['fdcId'] ?? '---') . "</li>";
     echo "<li><strong>Data Type: </strong>" . htmlspecialchars($data['dataType'] ?? '---') . "</li>";
     echo "</ul>";
     echo "<hr>";
 
-    // Display ingredients if available
+    // Display ingredients in a table if available
     if (isset($data['ingredients']) && !empty($data['ingredients']))
     {
-        echo "<h2>Ingredients</h2>";
+        echo "<h2 class='display-6'>Ingredients</h2>";
         $ingredientsArray = explode(', ', $data['ingredients']); // Split ingredients by comma and space
-        echo "<ul>";
+        echo "<table class='table table-striped'>";
+        echo "<thead><tr><th class='col-7'>Ingredient</th><th class='col-1' >Action</th></tr></thead>";
+        echo "<tbody>";
         foreach ($ingredientsArray as $ingredient)
         {
             $highlightedIngredient = highlightIngredients($ingredient, $highlightedIngredients);
-            // Create a form for each ingredient
-            echo "<li>";
+            echo "<tr class='ingredient-row'>";
+            echo "<td>$highlightedIngredient</td>";
+            echo "<td>";
+            // Create a form for each ingredient with an "Add" button
             echo "<form method='post' style='display:inline;'>";
             echo "<input type='hidden' name='ingredient' value='" . htmlspecialchars($ingredient) . "'>";
-            echo "<button type='submit' class='btn btn-link'>$highlightedIngredient</button>";
+            echo "<button type='submit' class='btn btn-success btn-sm' style='height: 25px;'>Add</button>";
             echo "</form>";
-            echo "</li>";
+            echo "</td>";
+            echo "</tr>";
         }
-        echo "</ul>";
-        echo "<hr>";
+        echo "</tbody>";
+        echo "</table>";
     }
     else
     {
-        echo "<h2>Ingredients</h2>";
+        echo "<h2 class='display-6'>Ingredients</h2>";
         echo "<p>No ingredients available.</p>";
     }
 
     // Display nutrients in a table
-    echo "<h2>Food Nutrients</h2>";
+    echo "<h2 class='display-6'>Food Nutrients</h2>";
     echo "<div class='col-md-12'>";
     echo "<table class='table table-striped'>";
     echo "<thead><tr><th class='col-5'>Nutrient Name</th><th class='col-3'>Amount</th><th class='col-1'>Unit</th></tr></thead>";
@@ -112,7 +117,6 @@ function displayFoodDetails($data, $highlightedIngredients)
     echo "</div>";
     echo "</div>";
 }
-
 
 // Function to handle adding FDC ID to the current meal
 function addFdcIdToMeal($conn)
@@ -222,7 +226,6 @@ function addIngredientToAlerts($conn)
         }
     }
 }
-
 
 // Function to fetch and display food details
 function fetchAndDisplayDetails($conn, $fdcId)
