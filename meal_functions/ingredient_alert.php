@@ -6,14 +6,20 @@ include '../account_functions/db_connection.php';
 // Function to fetch ingredient alerts from the database
 function getIngredientAlerts($conn, $user_id)
 {
-    $sql = "SELECT alerts FROM users WHERE id = $user_id";
-    $result = $conn->query($sql);
+    $sql = "SELECT alerts FROM users WHERE id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
     if ($result && $result->num_rows > 0)
     {
         $row = $result->fetch_assoc();
         $alerts = json_decode($row['alerts'], true);
-        return is_array($alerts) ? array_map('trim', $alerts) : [];
+        $alerts = is_array($alerts) ? array_map('trim', $alerts) : [];
+
+        // Return the list with the newest ingredients first
+        return array_reverse($alerts);
     }
 
     return [];
@@ -118,7 +124,8 @@ function addIngredientToAlerts($conn)
             // Add the new ingredient to the alerts array if it's not already present
             if (!in_array($newIngredient, $alerts))
             {
-                $alerts[] = $newIngredient;
+                // Add to the beginning of the array
+                array_unshift($alerts, $newIngredient);
                 $alertsJson = json_encode($alerts);
 
                 // Use a prepared statement to update the alerts
@@ -147,7 +154,6 @@ function addIngredientToAlerts($conn)
     }
 }
 
-
 // Handle form submission for adding and removing ingredients from alerts
 addIngredientToAlerts($conn);
 removeIngredientFromAlerts($conn);
@@ -171,19 +177,22 @@ $user_id = isset($_SESSION['id']) ? $_SESSION['id'] : null;
         <div class="col-md-10 mx-auto">
             <?php
             // Display success message if set
-            if (isset($_SESSION['success_message'])) {
+            if (isset($_SESSION['success_message']))
+            {
                 echo "<div class='alert alert-success'>" . $_SESSION['success_message'] . "</div>";
                 unset($_SESSION['success_message']);
             }
 
             // Display error message if set
-            if (isset($_SESSION['error_message'])) {
+            if (isset($_SESSION['error_message']))
+            {
                 echo "<div class='alert alert-danger'>" . $_SESSION['error_message'] . "</div>";
                 unset($_SESSION['error_message']);
             }
 
             // Check if user is logged in
-            if (!$user_id) {
+            if (!$user_id)
+            {
                 echo "<div class='alert alert-danger'>You must be logged in to view ingredient alerts.</div>";
                 return;
             }
@@ -207,15 +216,19 @@ $user_id = isset($_SESSION['id']) ? $_SESSION['id'] : null;
             // Fetch and display ingredient alerts
             $alerts = getIngredientAlerts($conn, $user_id);
 
-            if (empty($alerts)) {
+            if (empty($alerts))
+            {
                 echo "<p>No ingredients in your alert list.</p>";
-            } else {
+            }
+            else
+            {
                 echo "<h2 class='display-6'>Your Ingredient Alerts</h2>";
                 echo "<table class='table table-striped'>";
                 echo "<thead><tr><th class='col-5'>Ingredient</th><th class='col-1 text-center'>Action</th></tr></thead>";
                 echo "<tbody>";
 
-                foreach ($alerts as $ingredient) {
+                foreach ($alerts as $ingredient)
+                {
                     echo "<tr class='ingredient-row'>";
                     echo "<td>" . htmlspecialchars($ingredient) . "</td>";
                     echo "<td class='text-center'>";
