@@ -20,7 +20,7 @@
 <body>
 	<div class="container d-flex align-items-center justify-content-center" style="padding-top:5vh">
 		<div class="col-md-6" style="max-width: 400px">
-			<h1 class="text-center" style="">Account Settings</h1>
+			<h1 class="text-center display-6" style="">Account Settings</h1>
 			
 			<div class="form-group row mb-2">
 				<label class="col-form-label" style="padding-bottom:0"><b>Email&nbsp;&nbsp;</b><a href="account_functions/change_email.php">Change</a></label>
