@@ -232,63 +232,75 @@ if (isset($_POST['remove_fdc_id']))
                 <?php unset($_SESSION['error_message']); ?>
             <?php endif; ?>
 
-            <!-- Display food items in a table -->
+            <!-- Display food items or error message -->
             <div id="foodItems">
                 <h2>Food Items</h2>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th class="col-5">Food Name</th>
-                            <th class="col-3">Category</th>
-                            <th class="col-1">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($foodDetails as $food) : ?>
+                <?php if (empty($foodDetails)) : ?>
+                    <div class="alert alert-danger">
+                        No food items available.
+                    </div>
+                <?php else : ?>
+                    <table class="table">
+                        <thead>
                             <tr>
-                                <td><a href="meal_functions/food.php?fdcId=<?= $food['fdcId'] ?>"><?= $food['name'] ?></a></td>
-                                <td><?= $food['category'] ?></td>
-                                <td>
-                                    <form method="post" action="">
-                                        <input type="hidden" name="remove_fdc_id" value="<?= $food['fdcId'] ?>">
-                                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                                    </form>
-                                </td>
+                                <th class="col-5">Food Name</th>
+                                <th class="col-3">Category</th>
+                                <th class="col-1">Action</th>
                             </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($foodDetails as $food) : ?>
+                                <tr>
+                                    <td><a href="meal_functions/food.php?fdcId=<?= $food['fdcId'] ?>"><?= $food['name'] ?></a></td>
+                                    <td><?= $food['category'] ?></td>
+                                    <td>
+                                        <form method="post" action="">
+                                            <input type="hidden" name="remove_fdc_id" value="<?= $food['fdcId'] ?>">
+                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php endif; ?>
             </div>
 
             <hr>
 
-            <!-- Display total nutrients table -->
+            <!-- Display total nutrients or error message -->
             <div id="totalNutrients">
                 <h2>Total Nutrients</h2>
-                <table class="table table-striped nutrient-table">
-                    <thead>
-                        <tr>
-                            <th class="col-5">Nutrient Name</th>
-                            <th class="col-3">Total Amount</th>
-                            <th class="col-1">Unit</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($totalNutrients as $type => $nutrients) : ?>
-                            <!-- Category Row -->
+                <?php if (empty($totalNutrients)) : ?>
+                    <div class="alert alert-danger">
+                        No nutrients available.
+                    </div>
+                <?php else : ?>
+                    <table class="table table-striped nutrient-table">
+                        <thead>
                             <tr>
-                            <td colspan="3" style="background-color: var(--bs-primary); color: white;"><strong><?= ucfirst($type) ?></strong></td>
+                                <th class="col-5">Nutrient Name</th>
+                                <th class="col-3">Total Amount</th>
+                                <th class="col-1">Unit</th>
                             </tr>
-                            <?php foreach ($nutrients as $nutrient) : ?>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($totalNutrients as $type => $nutrients) : ?>
+                                <!-- Category Row -->
                                 <tr>
-                                    <td class="nutrient-cell"><?= htmlspecialchars($nutrient['name']) ?></td>
-                                    <td class="nutrient-cell"><?= htmlspecialchars($nutrient['amount']) ?></td>
-                                    <td class="nutrient-cell"><?= htmlspecialchars($nutrient['unitName']) ?></td>
+                                    <td colspan="3" style="background-color: var(--bs-primary); color: white;"><strong><?= ucfirst($type) ?></strong></td>
                                 </tr>
+                                <?php foreach ($nutrients as $nutrient) : ?>
+                                    <tr>
+                                        <td class="nutrient-cell"><?= htmlspecialchars($nutrient['name']) ?></td>
+                                        <td class="nutrient-cell"><?= htmlspecialchars($nutrient['amount']) ?></td>
+                                        <td class="nutrient-cell"><?= htmlspecialchars($nutrient['unitName']) ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
                             <?php endforeach; ?>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
+                <?php endif; ?>
             </div>
         </div>
     </div>

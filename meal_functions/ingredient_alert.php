@@ -31,12 +31,15 @@ function removeIngredientFromAlerts($conn)
             return;
         }
 
-        $ingredient = $conn->real_escape_string(trim($_POST['ingredient']));
+        $ingredient = trim($_POST['ingredient']);
         $user_id = $_SESSION['id'];
 
         // Fetch the current alerts from the database
-        $sql = "SELECT alerts FROM users WHERE id = $user_id";
-        $result = $conn->query($sql);
+        $sql = "SELECT alerts FROM users WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
 
         if ($result && $result->num_rows > 0)
         {
@@ -49,15 +52,19 @@ function removeIngredientFromAlerts($conn)
             {
                 $alerts = array_diff($alerts, [$ingredient]);
                 $alertsJson = json_encode($alerts);
-                $sqlUpdate = "UPDATE users SET alerts = '$alertsJson' WHERE id = $user_id";
 
-                if ($conn->query($sqlUpdate) === TRUE)
+                // Use a prepared statement to update the alerts
+                $sqlUpdate = "UPDATE users SET alerts = ? WHERE id = ?";
+                $stmtUpdate = $conn->prepare($sqlUpdate);
+                $stmtUpdate->bind_param("si", $alertsJson, $user_id);
+
+                if ($stmtUpdate->execute())
                 {
                     $_SESSION['success_message'] = "Ingredient removed from your alerts.";
                 }
                 else
                 {
-                    $_SESSION['error_message'] = "Error updating alerts: " . $conn->error;
+                    $_SESSION['error_message'] = "Error updating alerts: " . $stmtUpdate->error;
                 }
             }
             else
@@ -91,12 +98,16 @@ function addIngredientToAlerts($conn)
             return;
         }
 
-        $newIngredient = $conn->real_escape_string($newIngredient);
+        // Convert the ingredient to uppercase
+        $newIngredient = strtoupper($newIngredient);
         $user_id = $_SESSION['id'];
 
         // Fetch the current alerts from the database
-        $sql = "SELECT alerts FROM users WHERE id = $user_id";
-        $result = $conn->query($sql);
+        $sql = "SELECT alerts FROM users WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
 
         if ($result && $result->num_rows > 0)
         {
@@ -109,15 +120,19 @@ function addIngredientToAlerts($conn)
             {
                 $alerts[] = $newIngredient;
                 $alertsJson = json_encode($alerts);
-                $sqlUpdate = "UPDATE users SET alerts = '$alertsJson' WHERE id = $user_id";
 
-                if ($conn->query($sqlUpdate) === TRUE)
+                // Use a prepared statement to update the alerts
+                $sqlUpdate = "UPDATE users SET alerts = ? WHERE id = ?";
+                $stmtUpdate = $conn->prepare($sqlUpdate);
+                $stmtUpdate->bind_param("si", $alertsJson, $user_id);
+
+                if ($stmtUpdate->execute())
                 {
                     $_SESSION['success_message'] = "Ingredient added to your alerts.";
                 }
                 else
                 {
-                    $_SESSION['error_message'] = "Error updating alerts: " . $conn->error;
+                    $_SESSION['error_message'] = "Error updating alerts: " . $stmtUpdate->error;
                 }
             }
             else
@@ -131,6 +146,7 @@ function addIngredientToAlerts($conn)
         }
     }
 }
+
 
 // Handle form submission for adding and removing ingredients from alerts
 addIngredientToAlerts($conn);
@@ -155,59 +171,58 @@ $user_id = isset($_SESSION['id']) ? $_SESSION['id'] : null;
         <div class="col-md-10 mx-auto">
             <?php
             // Display success message if set
-            if (isset($_SESSION['success_message']))
-            {
+            if (isset($_SESSION['success_message'])) {
                 echo "<div class='alert alert-success'>" . $_SESSION['success_message'] . "</div>";
                 unset($_SESSION['success_message']);
             }
 
             // Display error message if set
-            if (isset($_SESSION['error_message']))
-            {
+            if (isset($_SESSION['error_message'])) {
                 echo "<div class='alert alert-danger'>" . $_SESSION['error_message'] . "</div>";
                 unset($_SESSION['error_message']);
             }
 
             // Check if user is logged in
-            if (!$user_id)
-            {
+            if (!$user_id) {
                 echo "<div class='alert alert-danger'>You must be logged in to view ingredient alerts.</div>";
                 return;
             }
 
             // Form to add a new ingredient
-            echo "<h2>Add New Ingredient</h2>";
+            echo "<h2 class='display-5'>Ingredient Alert</h2>";
+            echo "<hr>";
             echo "<form method='post'>";
-            echo "<div class='mb-3'>";
-            echo "<label for='new_ingredient' class='form-label'>Ingredient</label>";
+            echo "<div class='row mb-3'>";
+            echo "<div class='col-md-5'>";
+            echo "<label for='new_ingredient' class='form-label'>Manually add an ingredient</label>";
             echo "<input type='text' id='new_ingredient' name='new_ingredient' class='form-control'>";
             echo "</div>";
+            echo "<div class='col-md-4 d-flex align-items-end'>";
             echo "<button type='submit' class='btn btn-primary'>Add Ingredient</button>";
+            echo "</div>";
+            echo "</div>";
             echo "</form>";
+            echo "<hr>";
 
             // Fetch and display ingredient alerts
             $alerts = getIngredientAlerts($conn, $user_id);
 
-            if (empty($alerts))
-            {
+            if (empty($alerts)) {
                 echo "<p>No ingredients in your alert list.</p>";
-            }
-            else
-            {
-                echo "<h2>Your Ingredient Alerts</h2>";
+            } else {
+                echo "<h2 class='display-6'>Your Ingredient Alerts</h2>";
                 echo "<table class='table table-striped'>";
-                echo "<thead><tr><th class='col-9'>Ingredient</th><th class='col-3'>Action</th></tr></thead>";
+                echo "<thead><tr><th class='col-5'>Ingredient</th><th class='col-1 text-center'>Action</th></tr></thead>";
                 echo "<tbody>";
 
-                foreach ($alerts as $ingredient)
-                {
-                    echo "<tr>";
+                foreach ($alerts as $ingredient) {
+                    echo "<tr class='ingredient-row'>";
                     echo "<td>" . htmlspecialchars($ingredient) . "</td>";
-                    echo "<td>";
+                    echo "<td class='text-center'>";
                     // Form to remove ingredient from alerts
                     echo "<form method='post' style='display:inline;'>";
                     echo "<input type='hidden' name='ingredient' value='" . htmlspecialchars($ingredient) . "'>";
-                    echo "<button type='submit' class='btn btn-danger btn-sm'>Remove</button>";
+                    echo "<button type='submit' class='btn btn-danger btn-sm' style='line-height: 15px;'>Delete</button>";
                     echo "</form>";
                     echo "</td>";
                     echo "</tr>";

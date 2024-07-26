@@ -135,18 +135,6 @@ function deleteMeal($conn, $meal_id)
     return $conn->query($sql);
 }
 
-// Function to update ingredient alerts
-function updateIngredientAlerts($conn, $user_id, $ingredientAlerts)
-{
-    $alertsArray = array_map('trim', explode(',', $ingredientAlerts)); // Convert to array and trim whitespace
-    $alertsJson = json_encode($alertsArray);
-    $escapedAlertsJson = $conn->real_escape_string($alertsJson);
-
-    $sql = "UPDATE users SET alerts = '$escapedAlertsJson' WHERE id = $user_id";
-
-    return $conn->query($sql);
-}
-
 // Handle form submissions
 function handleFormSubmissions($conn)
 {
@@ -252,22 +240,6 @@ function handleFormSubmissions($conn)
             header("Location: " . $_SERVER['PHP_SELF']);
             exit();
         }
-
-        if (isset($_POST['update_ingredient_alerts']))
-        {
-            $ingredientAlerts = $_POST['ingredient_alerts'];
-            if (updateIngredientAlerts($conn, $_SESSION['id'], $ingredientAlerts))
-            {
-                $_SESSION['success_message'] = "Ingredient alerts updated successfully.";
-            }
-            else
-            {
-                $_SESSION['error_message'] = "Error updating ingredient alerts: " . $conn->error;
-            }
-
-            header("Location: " . $_SERVER['PHP_SELF']);
-            exit();
-        }
     }
 }
 
@@ -341,24 +313,6 @@ if (isset($_SESSION['current_meal_id']))
                     <div class="col-md-4">
                         <button type="submit" name="update_meal_name"
                             class="btn btn-secondary btn-block mt-4">Rename</button>
-                    </div>
-                </div>
-            </form>
-
-            <!-- Form to update ingredient alerts -->
-            <form method="post" class="mb-3">
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label for="ingredientAlerts">Ingredient Alerts</label>
-                            <input type="text" class="form-control" id="ingredientAlerts" name="ingredient_alerts"
-                                placeholder="Enter ingredients separated by commas"
-                                value="<?= htmlspecialchars(implode(', ', json_decode($userDetails['alerts'] ?? '[]', true))) ?>">
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <button type="submit" name="update_ingredient_alerts"
-                            class="btn btn-primary btn-block mt-4">Update</button>
                     </div>
                 </div>
             </form>

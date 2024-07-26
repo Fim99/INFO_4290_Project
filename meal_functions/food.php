@@ -19,8 +19,11 @@ function fetchApiData($url)
 // Function to fetch ingredient alerts from the database
 function getIngredientAlerts($conn, $user_id)
 {
-    $sql = "SELECT alerts FROM users WHERE id = $user_id";
-    $result = $conn->query($sql);
+    $sql = "SELECT alerts FROM users WHERE id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
     if ($result && $result->num_rows > 0)
     {
@@ -39,8 +42,12 @@ function highlightIngredients($ingredients, $highlightedIngredients)
     foreach ($highlightedIngredients as $ingredient)
     {
         $ingredient = strtoupper($ingredient);
+
+        // Escape special characters in the ingredient
+        $escapedIngredient = preg_quote($ingredient, '/');
+
         // Use preg_replace to replace all occurrences of the ingredient with the highlighted version
-        $ingredients = preg_replace('/(' . preg_quote($ingredient, '/') . ')/i', '<span class="highlight">$1</span>', $ingredients);
+        $ingredients = preg_replace('/(' . $escapedIngredient . ')/i', '<span class="highlight">$1</span>', $ingredients);
     }
     return $ingredients;
 }
@@ -71,20 +78,41 @@ function displayFoodDetails($data, $highlightedIngredients)
     if (isset($data['ingredients']) && !empty($data['ingredients']))
     {
         echo "<h2 class='display-6'>Ingredients</h2>";
+
+        // Check if any of the ingredients match the alerts
         $ingredientsArray = explode(', ', $data['ingredients']); // Split ingredients by comma and space
-        echo "<table class='table table-striped'>";
-        echo "<thead><tr><th class='col-7'>Ingredient</th><th class='col-1' >Action</th></tr></thead>";
+        $alertMessage = null;
+        foreach ($ingredientsArray as $ingredient)
+        {
+            foreach ($highlightedIngredients as $alertIngredient)
+            {
+                if (stripos($ingredient, $alertIngredient) !== false)
+                {
+                    $alertMessage = "Alert: This food contains one or more ingredients that you have flagged!";
+                    break 2; // Break out of both loops
+                }
+            }
+        }
+
+        // Display alert message if needed
+        if ($alertMessage)
+        {
+            echo "<div class='alert alert-warning'>$alertMessage</div>";
+        }
+
+        echo "<table class='table table-striped col-md-10 mx-auto'>";
+        echo "<thead><tr><th class='col-6'>Ingredient</th><th class='col-1 text-center'>Add to Alert</th></tr></thead>";
         echo "<tbody>";
         foreach ($ingredientsArray as $ingredient)
         {
             $highlightedIngredient = highlightIngredients($ingredient, $highlightedIngredients);
             echo "<tr class='ingredient-row'>";
             echo "<td>$highlightedIngredient</td>";
-            echo "<td>";
+            echo "<td class='text-center'>";
             // Create a form for each ingredient with an "Add" button
-            echo "<form method='post' style='display:inline;'>";
+            echo "<form method='post' class='d-inline'>";
             echo "<input type='hidden' name='ingredient' value='" . htmlspecialchars($ingredient) . "'>";
-            echo "<button type='submit' class='btn btn-success btn-sm' style='height: 25px;'>Add</button>";
+            echo "<button type='submit' class='btn btn-success btn-sm' style='line-height: 15px;'>Add</button>";
             echo "</form>";
             echo "</td>";
             echo "</tr>";
@@ -100,9 +128,9 @@ function displayFoodDetails($data, $highlightedIngredients)
 
     // Display nutrients in a table
     echo "<h2 class='display-6'>Food Nutrients</h2>";
-    echo "<div class='col-md-12'>";
-    echo "<table class='table table-striped'>";
-    echo "<thead><tr><th class='col-5'>Nutrient Name</th><th class='col-3'>Amount</th><th class='col-1'>Unit</th></tr></thead>";
+    echo "<table class='table table-striped col-md-10 mx-auto'>";
+    echo "<thead><tr><th class='col-7'>Nutrient Name</th><th class='col-3'>Amount</th><th class='col-1'>Unit</th></tr></thead>";
+    echo "<tbody>";
     foreach ($data['foodNutrients'] as $nutrient)
     {
         echo "<tr>";
@@ -111,8 +139,8 @@ function displayFoodDetails($data, $highlightedIngredients)
         echo "<td>" . htmlspecialchars($nutrient['nutrient']['unitName'] ?? '---') . "</td>";
         echo "</tr>";
     }
+    echo "</tbody>";
     echo "</table>";
-    echo "</div>";
 
     echo "</div>";
     echo "</div>";
@@ -130,7 +158,7 @@ function addFdcIdToMeal($conn)
             return;
         }
 
-        $fdcId = $conn->real_escape_string($_POST['fdcId']);
+        $fdcId = trim($_POST['fdcId']);
         $currentMealId = $_SESSION['current_meal_id'] ?? null;
 
         if (!isset($currentMealId))
@@ -140,8 +168,11 @@ function addFdcIdToMeal($conn)
         }
 
         // Fetch the current food_fdcid from the database
-        $sql = "SELECT food_fdcid FROM meals WHERE id = $currentMealId";
-        $result = $conn->query($sql);
+        $sql = "SELECT food_fdcid FROM meals WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $currentMealId);
+        $stmt->execute();
+        $result = $stmt->get_result();
 
         if ($result && $result->num_rows > 0)
         {
@@ -153,18 +184,20 @@ function addFdcIdToMeal($conn)
 
             // Update the database with the new array
             $newFoodFdcidJson = json_encode($currentFoodFdcid);
-            $sqlUpdate = "UPDATE meals SET food_fdcid = '$newFoodFdcidJson' WHERE id = $currentMealId";
+            $sqlUpdate = "UPDATE meals SET food_fdcid = ? WHERE id = ?";
+            $stmtUpdate = $conn->prepare($sqlUpdate);
+            $stmtUpdate->bind_param("si", $newFoodFdcidJson, $currentMealId);
 
-            if ($conn->query($sqlUpdate) === TRUE)
+            if ($stmtUpdate->execute())
             {
                 $_SESSION['success_message'] = "Food added to the current meal.";
-                // Redirect with the fdcId parameter
+                // Redirect to the same page with the fdcId parameter to avoid form resubmission
                 header("Location: " . $_SERVER['PHP_SELF'] . "?fdcId=" . urlencode($fdcId));
                 exit;
             }
             else
             {
-                $_SESSION['error_message'] = "Error updating meal: " . $conn->error;
+                $_SESSION['error_message'] = "Error updating meal: " . $stmtUpdate->error;
             }
         }
         else
@@ -173,6 +206,7 @@ function addFdcIdToMeal($conn)
         }
     }
 }
+
 
 // Function to handle adding ingredients to alerts
 function addIngredientToAlerts($conn)
@@ -186,12 +220,15 @@ function addIngredientToAlerts($conn)
             return;
         }
 
-        $ingredient = $conn->real_escape_string(trim($_POST['ingredient']));
+        $ingredient = trim($_POST['ingredient']);
         $user_id = $_SESSION['id'];
 
         // Fetch the current alerts from the database
-        $sql = "SELECT alerts FROM users WHERE id = $user_id";
-        $result = $conn->query($sql);
+        $sql = "SELECT alerts FROM users WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
 
         if ($result && $result->num_rows > 0)
         {
@@ -204,15 +241,20 @@ function addIngredientToAlerts($conn)
             {
                 $alerts[] = $ingredient;
                 $alertsJson = json_encode($alerts);
-                $sqlUpdate = "UPDATE users SET alerts = '$alertsJson' WHERE id = $user_id";
+                $sqlUpdate = "UPDATE users SET alerts = ? WHERE id = ?";
+                $stmtUpdate = $conn->prepare($sqlUpdate);
+                $stmtUpdate->bind_param("si", $alertsJson, $user_id);
 
-                if ($conn->query($sqlUpdate) === TRUE)
+                if ($stmtUpdate->execute())
                 {
                     $_SESSION['success_message'] = "Ingredient added to your alerts.";
+                    // Redirect to avoid form resubmission
+                    header("Location: " . $_SERVER['PHP_SELF'] . "?fdcId=" . urlencode($_GET['fdcId']));
+                    exit;
                 }
                 else
                 {
-                    $_SESSION['error_message'] = "Error updating alerts: " . $conn->error;
+                    $_SESSION['error_message'] = "Error updating alerts: " . $stmtUpdate->error;
                 }
             }
             else
@@ -226,6 +268,7 @@ function addIngredientToAlerts($conn)
         }
     }
 }
+
 
 // Function to fetch and display food details
 function fetchAndDisplayDetails($conn, $fdcId)
@@ -259,14 +302,11 @@ function fetchAndDisplayDetails($conn, $fdcId)
 
 // ------ MAIN CODE START WHERE METHODS ARE CALLED -------
 
-// Handle form submission for adding FDC ID to current meal
 addFdcIdToMeal($conn);
-
-// Handle form submission for adding ingredient to alerts
 addIngredientToAlerts($conn);
 
 // Get the fdcId from the URL parameter
-$fdcId = isset($_GET['fdcId']) ? urlencode($_GET['fdcId']) : null;
+$fdcId = isset($_GET['fdcId']) ? htmlspecialchars($_GET['fdcId']) : null;
 
 ?>
 <!DOCTYPE html>
@@ -281,26 +321,25 @@ $fdcId = isset($_GET['fdcId']) ? urlencode($_GET['fdcId']) : null;
 
 <body>
     <div class="container mt-4">
-        <div class="col-md-10 mx-auto">
             <?php
             // Display success message if set
             if (isset($_SESSION['success_message']))
             {
-                echo "<div class='alert alert-success'>" . $_SESSION['success_message'] . "</div>";
+                echo "<div class='alert alert-success col-md-10 mx-auto'>" . $_SESSION['success_message'] . "</div>";
                 unset($_SESSION['success_message']);
             }
 
             // Display error message if set
             if (isset($_SESSION['error_message']))
             {
-                echo "<div class='alert alert-danger'>" . $_SESSION['error_message'] . "</div>";
+                echo "<div class='alert alert-danger col-md-10 mx-auto'>" . $_SESSION['error_message'] . "</div>";
                 unset($_SESSION['error_message']);
             }
 
             // Check if food item is specified
             if (!$fdcId)
             {
-                echo "<div class='alert alert-danger'>No food item specified.</div>";
+                echo "<div class='alert alert-danger col-md-10 mx-auto'>No food item specified.</div>";
                 return;
             }
 
@@ -308,7 +347,6 @@ $fdcId = isset($_GET['fdcId']) ? urlencode($_GET['fdcId']) : null;
             fetchAndDisplayDetails($conn, $fdcId);
             ?>
         </div>
-    </div>
 </body>
 
 </html>
