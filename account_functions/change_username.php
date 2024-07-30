@@ -54,7 +54,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Account Settings</title>
+    <title>Change Username</title>
     <?php include '../bootstrap.html'?>
 	<link href="../custom.css" rel="stylesheet">
 </head>
