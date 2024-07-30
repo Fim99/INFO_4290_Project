@@ -18,8 +18,8 @@ function getIngredientAlerts($conn, $user_id)
         $alerts = json_decode($row['alerts'], true);
         $alerts = is_array($alerts) ? array_map('trim', $alerts) : [];
 
-        // Return the list with the newest ingredients first
-        return array_reverse($alerts);
+        // Return the list as is, since we are adding new items at the beginning
+        return $alerts;
     }
 
     return [];
