@@ -30,9 +30,26 @@ CREATE TABLE unverified_users
 -- Create an event to remove expired verification requests
 CREATE EVENT event_purge_unverified_users
     ON SCHEDULE
-      EVERY 15 MINUTE
+		EVERY 15 MINUTE
     DO
-      DELETE FROM unverified_users WHERE expires <= UNIX_TIMESTAMP();
+		DELETE FROM unverified_users WHERE expires <= UNIX_TIMESTAMP();
+
+CREATE TABLE email_change_requests
+(
+	user_id INT PRIMARY KEY NOT NULL,
+	email VARCHAR(255) UNIQUE NOT NULL,
+	selector VARCHAR(255) UNIQUE NOT NULL,
+	validator VARCHAR(255) NOT NULL,
+	type INT NOT NULL,
+	expires INT NOT NULL,
+	FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE EVENT event_purge_email_change_requests
+    ON SCHEDULE
+		EVERY 15 MINUTE
+    DO
+      	DELETE FROM email_change_requests WHERE expires <= UNIX_TIMESTAMP();
 
 -- Create the meals table
 CREATE TABLE meals 
