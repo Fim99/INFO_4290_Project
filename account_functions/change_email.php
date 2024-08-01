@@ -1,4 +1,11 @@
 <?php
+	use PHPMailer\PHPMailer\PHPMailer;
+	use PHPMailer\PHPMailer\SMTP;
+	use PHPMailer\PHPMailer\Exception;
+
+	//Load Composer's autoloader
+	require '../vendor/autoload.php';
+
 	include '../nav.php';
 	include '../account_functions/db_connection.php';
 
@@ -91,11 +98,30 @@
 			// For now, using non-functional emails.
 			$url = page_url . "?selector=" . $selector . "&validator=" . bin2hex($token); // Temporary url
 			
-			$to = $email;
+			$recieverEmail = $email;
+			$senderEmail = 'nutritionappproject@gmail.com';
+			$name = 'NutritionWebApp';
 			$subject = "Email change request for " . $_SESSION["username"];
 			$txt = "Click on this link to change the email address associated with your account: " . $url;
-			$headers = "From: nutritional_tracker@test.com";
-			mail($to,$subject,$txt,$headers);
+			
+            // Creating a mail service with PHP Mailer
+			$mail = new PHPMailer(true);
+			$mail->isSMTP();
+			$mail->SMTPAuth = true;
+			$mail->Host = 'smtp.gmail.com'; 
+
+			$mail->Username   = 'nutritionappproject@gmail.com';            //SMTP username
+			$mail->Password   = 'iobp nwut dpeg kyus';                      //SMTP password
+			$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;             //Enable implicit TLS encryption
+			$mail->Port = 587; 
+
+			$mail->setFrom($senderEmail, $name);
+			$mail->addAddress($recieverEmail);
+
+			$mail->Subject = $subject;
+			$mail->Body = $txt;
+
+        	$mail->send();
 		}
 	}
 ?>
@@ -246,12 +272,31 @@
 				// Send email with link.
 				// For now, using non-functional emails.
 				$url = page_url . "?selector=" . $selector . "&validator=" . bin2hex($token); // Temporary url
-				
-				$to = $new_email;
+
+				$recieverEmail = $new_email;
+				$senderEmail = 'nutritionappproject@gmail.com';
+				$name = 'NutritionWebApp';
 				$subject = "Email change confirmation for " . $username;
 				$txt = "Click on this link to confirm the change of email address: " . $url;
-				$headers = "From: nutritional_tracker@test.com";
-				mail($to,$subject,$txt,$headers);
+
+				// Creating a mail service with PHP Mailer
+				$mail = new PHPMailer(true);
+				$mail->isSMTP();
+				$mail->SMTPAuth = true;
+				$mail->Host = 'smtp.gmail.com'; 
+
+				$mail->Username   = 'nutritionappproject@gmail.com';            //SMTP username
+				$mail->Password   = 'iobp nwut dpeg kyus';                      //SMTP password
+				$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;             //Enable implicit TLS encryption
+				$mail->Port = 587; 
+
+				$mail->setFrom($senderEmail, $name);
+				$mail->addAddress($recieverEmail);
+
+				$mail->Subject = $subject;
+				$mail->Body = $txt;
+
+				$mail->send();
 			}
 		}
 	?>
