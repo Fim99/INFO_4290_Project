@@ -1,7 +1,7 @@
 <?php
-	include '../nav.php';
-	include '../account_functions/check_loggin.php';
-	include '../account_functions/db_connection.php';
+	include_once '../nav.php';
+	require_once '../account_functions/check_loggin.php';
+	include_once '../account_functions/db_connection.php';
 
 	$result = $conn->query("SELECT * from users WHERE id = '$user_id'")->fetch_object();
 	$email = $result->email;
@@ -14,7 +14,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Account Settings</title>
-    <?php include '../bootstrap.html'?>
+    <?php include_once '../bootstrap.html'?>
 </head>
 
 <body>

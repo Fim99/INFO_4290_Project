@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Food Search</title>
     <?php 
-    include 'bootstrap.html';
-    include 'nav.php';
+    include_once 'bootstrap.html';
+    include_once 'nav.php';
     ?>
 </head>
 
@@ -72,7 +72,7 @@
             <div class="col-lg-9">
                 <div id="results">
                     <!-- Include search results from search.php -->
-                    <br><?php include 'meal_functions/search.php'; ?>
+                    <br><?php require_once 'meal_functions/search.php'; ?>
                 </div>
             </div>
         </div>

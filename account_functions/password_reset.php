@@ -19,7 +19,7 @@
         // Expire time for token in seconds
         $expire = date("U") + 900;  // 900 seconds = 15 minutes
        
-        include '../account_functions/db_connection.php';
+        include_once '../account_functions/db_connection.php';
 
         $userEmail = $_POST["email"];
 

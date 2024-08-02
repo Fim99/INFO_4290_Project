@@ -1,21 +1,21 @@
 <?php
 
-include '../nav.php';
-include '../account_functions/check_loggin.php';
-include 'api.php';
-include '../account_functions/db_connection.php';
+include_once '../nav.php';
+require_once '../account_functions/check_loggin.php';
+require_once 'api.php';
+include_once '../account_functions/db_connection.php';
 
-include 'nutrients_array.php';
+require_once 'nutrients_array.php';
 
 // Function to build API URL
-function buildApiUrl($fdcIds)
+function buildApiUrlDetails($fdcIds)
 {
     $ids = implode('&fdcIds=', $fdcIds);
     return "https://api.nal.usda.gov/fdc/v1/foods?fdcIds=$ids";
 }
 
 // Function to fetch and decode API response
-function fetchApiData($url)
+function fetchApiDataDetails($url)
 {
     $response = fetchDataFromAPI($url);
     return $response ? json_decode($response, true) : null;
@@ -24,8 +24,8 @@ function fetchApiData($url)
 // Function to fetch food details using API
 function fetchFoodDetails($fdcIds)
 {
-    $url = buildApiUrl($fdcIds);
-    $data = fetchApiData($url);
+    $url = buildApiUrlDetails($fdcIds);
+    $data = fetchApiDataDetails($url);
     return $data;
 }
 

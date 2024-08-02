@@ -1,8 +1,8 @@
 <?php
-include '../nav.php';
-include '../account_functions/check_loggin.php';
-include 'api.php';
-include '../account_functions/db_connection.php';
+include_once '../nav.php';
+require_once '../account_functions/check_loggin.php';
+require_once 'api.php';
+include_once '../account_functions/db_connection.php';
 
 // Function to get user details by user ID
 function getUserDetails($conn, $user_id)

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Account Recovery</title>
-    <?php include '../bootstrap.html'?>
+    <?php include_once '../bootstrap.html'?>
 </head>
 
 <body>

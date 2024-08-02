@@ -4,10 +4,10 @@
 	use PHPMailer\PHPMailer\Exception;
 
 	//Load Composer's autoloader
-	require '../vendor/autoload.php';
+	require_once '../vendor/autoload.php';
 
-	include '../nav.php';
-	include '../account_functions/db_connection.php';
+	include_once '../nav.php';
+	include_once '../account_functions/db_connection.php';
 
 	const page_url = "http://localhost/INFO_4290_Project/account_functions/change_email.php";
 
@@ -34,14 +34,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Change Email</title>
-    <?php include '../bootstrap.html'?>
+    <?php include_once '../bootstrap.html'?>
 </head>
 
 
 <!-- Verify password. -->
 <?php if(!isset($_GET["selector"]) && !isset($_GET["validator"])) :
 
-	include '../account_functions/check_loggin.php'; // Only check if logged in when initially requesting email change.
+	require_once '../account_functions/check_loggin.php'; // Only check if logged in when initially requesting email change.
 
 	if(isset($_POST["password"]))
 	{

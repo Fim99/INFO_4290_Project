@@ -1,7 +1,7 @@
 <?php
-	include '../nav.php';
-	include '../account_functions/check_loggin.php';
-	include '../account_functions/db_connection.php';
+	include_once '../nav.php';
+	require_once '../account_functions/check_loggin.php';
+	include_once '../account_functions/db_connection.php';
 
 	function error_message($string)
 	{
@@ -55,7 +55,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Change Username</title>
-    <?php include '../bootstrap.html'?>
+    <?php include_once '../bootstrap.html'?>
 	<link href="../custom.css" rel="stylesheet">
 </head>
 

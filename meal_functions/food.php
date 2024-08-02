@@ -1,16 +1,16 @@
 <?php
-include '../nav.php';
-include 'api.php';
-include '../account_functions/db_connection.php';
+include_once '../nav.php';
+require_once 'api.php';
+include_once '../account_functions/db_connection.php';
 
 // Function to build the API URL for fetching food details
-function buildApiUrl($fdcId)
+function buildApiUrlFood($fdcId)
 {
     return "https://api.nal.usda.gov/fdc/v1/food/$fdcId?";
 }
 
 // Function to fetch and decode API response
-function fetchApiData($url)
+function fetchApiDataFood($url)
 {
     $response = fetchDataFromAPI($url);
     return $response ? json_decode($response, true) : null;
@@ -147,7 +147,7 @@ function displayFoodDetails($data, $highlightedIngredients)
 }
 
 // Function to handle adding FDC ID to the current meal
-function addFdcIdToMeal($conn)
+function addFdcIdToMealFood($conn)
 {
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['fdcId']))
     {
@@ -273,8 +273,8 @@ function addIngredientToAlerts($conn)
 // Function to fetch and display food details
 function fetchAndDisplayDetails($conn, $fdcId)
 {
-    $url = buildApiUrl($fdcId);
-    $data = fetchApiData($url);
+    $url = buildApiUrlFood($fdcId);
+    $data = fetchApiDataFood($url);
 
     if ($data === null)
     {
@@ -302,7 +302,7 @@ function fetchAndDisplayDetails($conn, $fdcId)
 
 // ------ MAIN CODE START WHERE METHODS ARE CALLED -------
 
-addFdcIdToMeal($conn);
+addFdcIdToMealFood($conn);
 addIngredientToAlerts($conn);
 
 // Get the fdcId from the URL parameter
@@ -316,7 +316,7 @@ $fdcId = isset($_GET['fdcId']) ? htmlspecialchars($_GET['fdcId']) : null;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Food Details</title>
-    <?php include '../bootstrap.html'; ?>
+    <?php include_once '../bootstrap.html'; ?>
 </head>
 
 <body>

@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FAQ - Meal Tracker</title>
     <?php 
-    include 'bootstrap.html'; 
-    include 'nav.php'; 
+    include_once 'bootstrap.html'; 
+    include_once 'nav.php'; 
     ?>
 </head>
 <body>

@@ -1,6 +1,6 @@
 <?php
     session_start();
-    include '../account_functions/db_connection.php';
+    include_once '../account_functions/db_connection.php';
 
     function error_message($string) {
         return "<div class='alert alert-danger mt-3 text-center'>" . htmlspecialchars($string, ENT_QUOTES, 'UTF-8') . "</div>";
@@ -28,7 +28,7 @@
             $hashed_password = $row["password"];
             if (password_verify($password, $hashed_password)) {
                 $_SESSION['success_message'] = "Login successful. Redirecting...";
-                include 'after_login.php';  // Include file for initializing session
+                require_once 'after_login.php';  // Include file for initializing session
                 $_SESSION['redirect'] = true; // Set a session variable to indicate redirection
                 header('Location: login.php');
                 exit();
@@ -49,7 +49,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
-    <?php include '../bootstrap.html'; ?>
+    <?php include_once '../bootstrap.html'; ?>
     <link href="../custom.css" rel="stylesheet">
     <?php
         // If redirection is set, add a meta refresh tag to the head

@@ -1,7 +1,7 @@
 <?php
-include '../nav.php';
-include '../account_functions/check_loggin.php';
-include '../account_functions/db_connection.php';
+include_once '../nav.php';
+require_once '../account_functions/check_loggin.php';
+include_once '../account_functions/db_connection.php';
 
 // Function to fetch ingredient alerts from the database
 function getIngredientAlerts($conn, $user_id)
@@ -169,7 +169,7 @@ $user_id = isset($_SESSION['id']) ? $_SESSION['id'] : null;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ingredient Alerts</title>
-    <?php include '../bootstrap.html'; ?>
+    <?php include_once '../bootstrap.html'; ?>
 </head>
 
 <body>

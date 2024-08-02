@@ -21,7 +21,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verification</title>
-    <?php include '../bootstrap.html'?>
+    <?php include_once '../bootstrap.html'?>
 </head>
 
 <body>
@@ -37,7 +37,7 @@
 </body>
 
 <?php
-	include '../account_functions/db_connection.php';
+	include_once '../account_functions/db_connection.php';
 
 	$verified = false;
 	$code_expired = false;

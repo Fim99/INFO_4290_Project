@@ -4,10 +4,10 @@
     use PHPMailer\PHPMailer\Exception;
 
     //Load Composer's autoloader
-    require '../vendor/autoload.php';
+    require_once '../vendor/autoload.php';
 
     session_start();
-    include '../account_functions/db_connection.php';
+    include_once '../account_functions/db_connection.php';
 	function error_message($string)
 	{
 		return "<div class='alert alert-danger mt-3 text-center'>" . htmlspecialchars($string, ENT_QUOTES, 'UTF-8') . "</div>";
@@ -118,7 +118,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registration</title>
-    <?php include '../bootstrap.html'; ?>
+    <?php include_once '../bootstrap.html'; ?>
     <link href="../custom.css" rel="stylesheet">
 </head>
 

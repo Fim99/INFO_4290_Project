@@ -1,6 +1,6 @@
 <?php
-include 'api.php';
-include 'account_functions/db_connection.php';
+require_once 'api.php';
+include_once 'account_functions/db_connection.php';
 
 // Function to get additional parameters from the URL
 function getAdditionalParams($params)
@@ -17,7 +17,7 @@ function getAdditionalParams($params)
 }
 
 // Function to build the URL with query and additional parameters
-function buildApiUrl($query, $additionalParams)
+function buildApiUrlSearch($query, $additionalParams)
 {
     $baseUrl = "https://api.nal.usda.gov/fdc/v1/foods/search?query=$query";
     foreach ($additionalParams as $key => $value)
@@ -31,7 +31,7 @@ function buildApiUrl($query, $additionalParams)
 }
 
 // Function to fetch and decode API response
-function fetchApiData($url)
+function fetchApiDataSearch($url)
 {
     $response = fetchDataFromAPI($url);
     return $response ? json_decode($response, true) : null;
@@ -95,7 +95,7 @@ function displayTableRow($food, $dataType)
 }
 
 // Function to handle adding FDC ID to the current meal
-function addFdcIdToMeal($conn)
+function addFdcIdToMealSearch($conn)
 {
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['fdcId']) && isset($_POST['addToMeal']))
     {
@@ -168,10 +168,10 @@ if (empty($additionalParams['dataType']))
 }
 
 // Build the API URL
-$url = buildApiUrl($query, $additionalParams);
+$url = buildApiUrlSearch($query, $additionalParams);
 
 // Fetch data from API
-$data = fetchApiData($url);
+$data = fetchApiDataSearch($url);
 
 // Check if data is not fetched
 if ($data === null)
@@ -188,7 +188,7 @@ if (empty($data['foods']))
 }
 
 // Handle adding FDC ID to the meal
-addFdcIdToMeal($conn);
+addFdcIdToMealSearch($conn);
 
 // Display success message if set
 if (isset($_SESSION['success_message']))

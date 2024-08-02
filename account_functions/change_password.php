@@ -1,9 +1,9 @@
 <!-- Password change interface, accessed from account info page. Assumes user is logged in. -->
 
 <?php
-	include '../nav.php';
-	include '../account_functions/check_loggin.php';
-	include '../account_functions/db_connection.php';
+	include_once '../nav.php';
+	require_once '../account_functions/check_loggin.php';
+	include_once '../account_functions/db_connection.php';
 
 	// Keep track of failed password guesses.
 	if(!isset($_SESSION["password_change_attempts"]))
