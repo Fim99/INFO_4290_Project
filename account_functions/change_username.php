@@ -13,6 +13,11 @@
         return "<div class='alert alert-success mt-3 text-center'>" . htmlspecialchars($string, ENT_QUOTES, 'UTF-8') . "</div>";
     }
 
+	// Keep track of failed password guesses.
+	if(!isset($_SESSION["password_attempts"]))
+		$_SESSION["password_attempts"] = 0;
+	const max_attempts = 5;
+
 	if(isset($_POST["submit"]))
 	{
 		$valid_input = true;
@@ -39,8 +44,27 @@
 			$valid_input = false;
 		}
 
+		$result = $conn->query("SELECT * from users WHERE id = '$user_id'")->fetch_object();
+		if($valid_input && !password_verify($_POST["password"], $result->password))
+		{
+			$valid_input = false;
+			$_SESSION['error_message'] = "Incorrect password.";
+			$_SESSION["password_attempts"]++;
+		}
+
+		// Log out the user after too many failed attempts.
+		if($_SESSION["password_attempts"] > max_attempts)
+		{
+			$_SESSION['error_message'] = "Too many failed password guesses.";
+
+			$log_out = true;
+			
+			header('Refresh: 2; url=login.php');
+		}
+
 		if($valid_input)
 		{
+			$_SESSION["password_attempts"] = 0;
 			$_SESSION["username"] = $new_username;
 			$conn->query("UPDATE users SET username = '$new_username' WHERE id = $user_id");
 			$_SESSION['success_message'] = "Successfully updated your username. Redirecting...";
@@ -65,9 +89,12 @@
 			<h1 class="text-center mb-4 display-6">Change Username</h1>
 				<p>Current Username: <?php echo $_SESSION["username"] ?></p>
 			<div class="form-group row mb-4" > 
-				<form name="change_username" style="display:inline-flex" method="post"> 
-					<input type="text" name="username" id="username" class="form-control" placeholder="New Username" autocomplete="off" minlength="3" maxlength="50" required style="width:80%">
-					<button class="btn btn-primary" type="submit" name="submit" style="width:19%; margin-left:1%">Update</button>
+				<form name="change_username" method="post"> 
+					<input type="text" name="username" id="username" class="form-control" placeholder="New Username" autocomplete="off" minlength="3" maxlength="50" required style="margin-bottom:10px">
+					<input type="password" name="password" id="password" class="form-control" placeholder="Current Password" autocomplete="off" maxlength="72" required style="margin-bottom:10px">
+					<div class="text-center">
+						<button class="btn btn-primary" type="submit" name="submit">Update</button>
+					</div>
 				</form>
 			</div>
 			<?php
@@ -88,6 +115,11 @@
 	</div>	
 </body>
 
-<?php
+<?php 
+	if (isset($log_out))
+	{
+		session_unset();
+		session_destroy();
+	}
 
 ?>
