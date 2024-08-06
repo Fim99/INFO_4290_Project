@@ -56,9 +56,8 @@
 			$_SESSION['error_message'] = "Too many failed password guesses.";
 
 			// Handle log-out.
-			session_unset();
-			session_destroy();
-			
+			$log_out = true;
+
 			header('Refresh: 2; url=login.php');
 		}
 
@@ -66,6 +65,7 @@
 		// If there are no errors, update password in database with new hash.
 		if($valid_input)
 		{
+			$_SESSION["password_change_attempts"] = 0;
 			$new_password_hash = password_hash($_POST["new_password"], PASSWORD_DEFAULT);
 			$conn->query("UPDATE users SET password = '$new_password_hash' WHERE id = '$user_id'");
 
@@ -91,7 +91,7 @@
 			<h1 class="text-center display-6">Change Password</h1>
 			<form name="change_password" method="post">
 				<div class="mb-2">
-					<input type="password" name="old_password" class="form-control" id="old_password" placeholder="Current Password" minlength="8" maxlength="72" required>
+					<input type="password" name="old_password" class="form-control" id="old_password" placeholder="Current Password" maxlength="72" required>
 				</div>
 				<div class="mb-2">
 					<input type="password" name="new_password" class="form-control" id="confirm_new_password" placeholder="New Password" minlength="8" maxlength="72" required>
@@ -123,3 +123,12 @@
 		
 	</div>
 </body>
+
+
+<?php 
+	if (isset($log_out))
+	{
+		session_unset();
+		session_destroy();
+	}
+?>
