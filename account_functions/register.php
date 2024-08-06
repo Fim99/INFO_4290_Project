@@ -95,7 +95,7 @@
 
             $mail->send();
             
-            mail($to, $subject, $txt, $headers);
+            //mail($to, $subject, $txt, $headers);
 
             $expires = time() + (5 * 60); // 5 minutes until code expires
 

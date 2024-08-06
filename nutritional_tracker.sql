@@ -30,7 +30,7 @@ CREATE TABLE unverified_users
 -- Create an event to remove expired verification requests
 CREATE EVENT event_purge_unverified_users
     ON SCHEDULE
-		EVERY 15 MINUTE
+		EVERY 5 MINUTE
     DO
 		DELETE FROM unverified_users WHERE expires <= UNIX_TIMESTAMP();
 
