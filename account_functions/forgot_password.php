@@ -1,31 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Account Recovery</title>
-    <?php include_once '../bootstrap.html'?>
+    <?php include_once '../bootstrap.html'; ?>
+    <link href="../custom.css" rel="stylesheet">
 </head>
 
 <body>
-    <h1>Account Recovery</h1>
-    <form name="account_recovery" method="post" action="password_reset.php">
-        <div class="container-fluid pt-3">
-            <div>
-                <h3>An email will be sent to the email entered below</h3>
-                <input type="text" name="email" id="email" placeholder="Email" required>
-            </div>
-            <div class='pt-2'>
-                <button class="btn btn-primary" type="submit" name="password_reset_submit">Send Password Reset Link</button>
-            </div>
-        </div>
-    </form>
-    <?php
-        if(isset($_GET["reset"])){
-            if ($_GET["reset"] == "success"){
-                echo "<p>Check your email for password reset code</p>";
+    <div class="container d-flex align-items-center justify-content-center" style="min-height: 80vh; padding-top: 5vh;">
+        <div class="col-md-4">
+            <h1 class="text-center mb-4 display-6">Account Recovery</h1>
+            <hr>
+            <?php
+            // Display success message if applicable
+            if (isset($_GET["reset"]) && $_GET["reset"] == "success")
+            {
+                echo success_message("Check your email for the password reset code.");
             }
-        }
-    ?>
+            ?>
+            <form name="account_recovery" method="post" action="password_reset.php">
+                <div class="form-group mb-3">
+                    <input type="email" name="email" id="email" class="form-control" placeholder="Email" required>
+                </div>
+                <div class="form-group text-center mb-3">
+                    <button class="btn btn-primary w-100" type="submit" name="password_reset_submit">Send Password Reset
+                        Link</button>
+                </div>
+                <div class="text-center">
+                    <p>Remember your password? <a href="login.php">Log In</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
+
 </html>
