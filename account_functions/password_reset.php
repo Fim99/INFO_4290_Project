@@ -14,7 +14,7 @@
         $token = random_bytes(32);
 
         // URL that will be sent by email to user for creating a new password
-        $url = "../account_functions/create_new_password.php?selector=$selector&$validator=".bin2hex($token);
+        $url = "http://localhost/INFO_4290_Project/account_functions/create_new_password.php?selector=$selector&validator=".bin2hex($token);
 
         // Expire time for token in seconds
         $expire = date("U") + 900;  // 900 seconds = 15 minutes
@@ -60,9 +60,9 @@
         $to = $userEmail;
         $name = 'NutritionWebApp';
         $subject = "Password Reset Request for Nutrition App";
-        $txt = "<p>A password reset has been requested on your account on Nutrition App. 
-        The link to reset your password is below. If you did not make this request, you can ignore this email.</p>";
-        $txt .= "<p>Password Reset Link: <a href>$url</a></p>";
+        $txt = "A password reset has been requested on your account on Nutrition App. 
+        The link to reset your password is below. If you did not make this request, you can ignore this email.";
+        $txt .= "Password Reset Link: $url";
 
         // Creating a mail service with PHP Mailer
         $mail = new PHPMailer(true);
@@ -89,11 +89,11 @@
         $mail->send();
 
         // Send user back to forgot password form with success message
-        header("Location: ../account_functions/forgot_password.php?reset=success");
+        header("Location: http://localhost/INFO_4290_Project/account_functions/forgot_password.php?reset=success");
 
     }
 
     else{
-        header("Location: ../index.php");
+        header("Location: http://localhost/INFO_4290_Project/index.php");
     }
 ?>
