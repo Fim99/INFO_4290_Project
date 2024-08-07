@@ -150,7 +150,7 @@
                 <div class="form-group form-check mb-3">
                     <input type="checkbox" name="agree_terms" class="form-check-input" id="agree_terms" required>
                     <label class="form-check-label" for="agree_terms">
-                        I agree that this site may store my personal data such as usernames, emails, paswords and meal data .
+                        I agree that this site may store my details and meal data.
                     </label>
                 </div>
                 <div class="form-group text-center mb-3">
