@@ -43,15 +43,15 @@ function getTableHeaders($dataType)
     switch ($dataType)
     {
         case 'Branded':
-            return ['Description', 'FDC ID', 'Food Category', 'Brand Owner', 'Brand', 'Market Country', '<div class="text-center">Add To Meal</div>'];
+            return ['<div class="text-center">Add To Meal</div>', 'Description', 'FDC ID', 'Food Category', 'Brand Owner', 'Brand', 'Market Country'];
         case 'Foundation':
-            return ['Description', 'FDC ID', 'Most Recent Acquisition', 'SR/ Foundation Category', '<div class="text-center">Add To Meal</div>'];
+            return ['<div class="text-center">Add To Meal</div>', 'Description', 'FDC ID', 'Most Recent Acquisition', 'SR/ Foundation Category'];
         case 'Survey (FNDDS)':
-            return ['Description', 'FDC ID', 'Additional Food Description', 'WWEIA Food Category', '<div class="text-center">Add To Meal</div>'];
+            return ['<div class="text-center">Add To Meal</div>', 'Description', 'FDC ID', 'Additional Food Description', 'WWEIA Food Category'];
         case 'SR Legacy':
-            return ['Description', 'FDC ID', 'SR Food Category', '<div class="text-center">Add To Meal</div>'];
+            return ['<div class="text-center">Add To Meal</div>', 'Description', 'FDC ID', 'SR Food Category'];
         default:
-            return ['Description', 'FDC ID', '<div class="text-center">Add To Meal</div>']; // Default headers
+            return ['<div class="text-center">Add To Meal</div>', 'Description', 'FDC ID']; // Default headers
     }
 }
 
@@ -60,6 +60,11 @@ function displayTableRow($food, $dataType)
 {
     // Concatenate HTML to variable to be returned
     $html = "<tr>";
+    // Add the "Add to Meal" form in the first column
+    $html .= "<td class='text-center'><form method='post'>";
+    $html .= "<input type='hidden' name='fdcId' value='" . htmlspecialchars($food['fdcId'] ?? '---') . "'>";
+    $html .= "<button type='submit' name='addToMeal' class='btn btn-primary btn-sm'>+</button>";
+    $html .= "</form></td>";
     $html .= "<td><a href='meal_functions/food.php?fdcId=" . urlencode($food['fdcId']) . "'>" . (empty($food['description']) ? "---" : htmlspecialchars($food['description'])) . "</a></td>";
     $html .= "<td>" . (empty($food['fdcId']) ? "---" : htmlspecialchars($food['fdcId'])) . "</td>";
 
@@ -83,12 +88,6 @@ function displayTableRow($food, $dataType)
             $html .= "<td>" . (empty($food['foodCategory']) ? "---" : htmlspecialchars($food['foodCategory'])) . "</td>";
             break;
     }
-
-    // Add the "Add to Meal" form in the last column
-    $html .= "<td class='text-center'><form method='post'>";
-    $html .= "<input type='hidden' name='fdcId' value='" . htmlspecialchars($food['fdcId'] ?? '---') . "'>";
-    $html .= "<button type='submit' name='addToMeal' class='btn btn-primary btn-sm center'>+</button>";
-    $html .= "</form></td>";
 
     $html .= "</tr>";
     return $html;
@@ -204,23 +203,56 @@ if (isset($_SESSION['error_message']))
     unset($_SESSION['error_message']);
 }
 
-// Display the results in a table
-echo "<table class='table'>";
-
-// Determine and output table headers
-$headers = getTableHeaders($_GET['dataType']);
-echo "<tr>";
-foreach ($headers as $header)
-{
-    echo "<th>$header</th>";
-}
-echo "</tr>";
-
-// Iterate over each food item and display table rows
-foreach ($data['foods'] as $food)
-{
-    echo displayTableRow($food, $_GET['dataType']);
-}
-
-echo "</table>";
 ?>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        .table 
+        {
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        .table-wrapper 
+        {
+            overflow-x: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid mt-4">
+        <div class="table-wrapper">
+            <table class="table table-bordered">
+                <!-- Determine and output table headers -->
+                <thead>
+                    <tr>
+                        <?php
+                        $headers = getTableHeaders($_GET['dataType']);
+                        foreach ($headers as $header)
+                        {
+                            echo "<th>$header</th>";
+                        }
+                        ?>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    // Iterate over each food item and display table rows
+                    foreach ($data['foods'] as $food)
+                    {
+                        echo displayTableRow($food, $_GET['dataType']);
+                    }
+                    ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>
