@@ -18,7 +18,10 @@
             // Display success message if applicable
             if (isset($_GET["reset"]) && $_GET["reset"] == "success")
             {
-                echo "Check your email for the password reset code.";
+                echo "Check your email for the password reset code";
+            }
+            else if (isset($_GET["reset"]) && $_GET["reset"] == "emailerror"){
+                echo "Email not found";
             }
             ?>
             <form name="account_recovery" method="post" action="password_reset.php">
