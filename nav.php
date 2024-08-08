@@ -2,7 +2,8 @@
 session_start();
 
 // Handle logout request
-if (isset($_POST['delete_session'])) {
+if (isset($_POST['delete_session']))
+{
     session_destroy();
     header("Location: /INFO_4290_Project/index.php");
     exit();
@@ -20,7 +21,8 @@ if (isset($_POST['delete_session'])) {
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
@@ -39,21 +41,25 @@ if (isset($_POST['delete_session'])) {
                     </li>
                 </ul>
                 <ul class="navbar-nav ms-auto">
-                    <?php if (isset($_SESSION['username'])): ?>
-                        <?php if (isset($_SESSION['current_meal_name'])): ?>
+                    <?php if (isset($_SESSION['username'])) : ?>
+                        <?php if (isset($_SESSION['current_meal_name'])) : ?>
                             <li class="nav-item">
-                                <span class="nav-link text-light">Currently Selected Meal: <?php echo htmlspecialchars($_SESSION['current_meal_name']); ?></span>
+                                <span class="nav-link text-light">Currently Selected Meal:
+                                    <?php echo htmlspecialchars($_SESSION['current_meal_name']); ?></span>
                             </li>
                         <?php endif; ?>
                         <li class="nav-item">
-                            <span class="nav-link text-light fw-bold"><?php echo htmlspecialchars($_SESSION['username']); ?></span>
+                            <span
+                                class="nav-link text-light fw-bold"><?php echo htmlspecialchars($_SESSION['username']); ?></span>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="account_functions/account_information.php">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="white" class="bi bi-gear" viewBox="0 0 16 16">
-                                    <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492M5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0"/>
-                                    <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115z"/>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 30"
+                                    fill="white">
+                                    <path
+                                        d="M24 13.616v-3.232c-1.651-.587-2.694-.752-3.219-2.019v-.001c-.527-1.271.1-2.134.847-3.707l-2.285-2.285c-1.561.742-2.433 1.375-3.707.847h-.001c-1.269-.526-1.435-1.576-2.019-3.219h-3.232c-.582 1.635-.749 2.692-2.019 3.219h-.001c-1.271.528-2.132-.098-3.707-.847l-2.285 2.285c.745 1.568 1.375 2.434.847 3.707-.527 1.271-1.584 1.438-3.219 2.02v3.232c1.632.58 2.692.749 3.219 2.019.53 1.282-.114 2.166-.847 3.707l2.285 2.286c1.562-.743 2.434-1.375 3.707-.847h.001c1.27.526 1.436 1.579 2.019 3.219h3.232c.582-1.636.75-2.69 2.027-3.222h.001c1.262-.524 2.12.101 3.698.851l2.285-2.286c-.744-1.563-1.375-2.433-.848-3.706.527-1.271 1.588-1.44 3.221-2.021zm-12 2.384c-2.209 0-4-1.791-4-4s1.791-4 4-4 4 1.791 4 4-1.791 4-4 4z" />
                                 </svg>
+
                             </a>
                         </li>
                         <li class="nav-item">
@@ -61,7 +67,7 @@ if (isset($_POST['delete_session'])) {
                                 <button type="submit" name="delete_session" class="btn btn-danger">Logout</button>
                             </form>
                         </li>
-                    <?php else: ?>
+                    <?php else : ?>
                         <li class="nav-item">
                             <span class="nav-link text-light fw-bold">Guest</span>
                         </li>
