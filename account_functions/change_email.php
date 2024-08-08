@@ -101,8 +101,9 @@
 			$recieverEmail = $email;
 			$senderEmail = 'nutritionappproject@gmail.com';
 			$name = 'NutritionWebApp';
-			$subject = "Email change request for " . $_SESSION["username"];
-			$txt = "Click on this link to change the email address associated with your account: " . $url;
+			$subject = "Nutrition App - Email change request for " . $_SESSION["username"];
+			$txt = "An email change has been requested on your Nutrition App Account.\r\n\r\n";
+			$txt .= "Use this link to change the email address associated with your account:\r\n" . $url;
 			
             // Creating a mail service with PHP Mailer
 			$mail = new PHPMailer(true);
@@ -276,8 +277,9 @@
 				$recieverEmail = $new_email;
 				$senderEmail = 'nutritionappproject@gmail.com';
 				$name = 'NutritionWebApp';
-				$subject = "Email change confirmation for " . $username;
-				$txt = "Click on this link to confirm the change of email address: " . $url;
+				$subject = "Nutrition App - Email change confirmation for " . $username;
+				$txt = "The user " . $username . " has requested to change their account email to this address.\r\n\r\n";
+				$txt .= "Use this link to confirm the change of email address:\r\n" . $url;
 
 				// Creating a mail service with PHP Mailer
 				$mail = new PHPMailer(true);
