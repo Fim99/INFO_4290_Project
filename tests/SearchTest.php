@@ -72,17 +72,26 @@ class SearchTest extends TestCase
     }
 
     // Test getTableHeaders
+// Test getTableHeaders
     public function testGetTableHeaders()
     {
         $dataType = 'Branded';
         $result = getTableHeaders($dataType);
-        $expected = ['Description', 'FDC ID', 'Food Category', 'Brand Owner', 'Brand', 'Market Country', '<div class="text-center">Add To Meal</div>'];
+        $expected = [
+            '<div class="text-center">Add To Meal</div>',
+            'Description',
+            'FDC ID',
+            'Food Category',
+            'Brand Owner',
+            'Brand',
+            'Market Country'
+        ];
 
         $this->assertEquals($expected, $result);
     }
 
 
-    // Test displayTableRow
+    // Test displayTableRow// Test displayTableRow
     public function testDisplayTableRow()
     {
         $food = [
@@ -107,6 +116,7 @@ class SearchTest extends TestCase
         $this->assertStringContainsString('<td>BrandOwnerName</td>', $html);
         $this->assertStringContainsString('<td>BrandName</td>', $html);
         $this->assertStringContainsString('<td>USA</td>', $html);
-        $this->assertStringContainsString('<button type="submit" name="addToMeal" class="btn btn-primary btn-sm center">+</button>', $html);
+        $this->assertStringContainsString('<button type="submit" name="addToMeal" class="btn btn-primary btn-sm">+</button>', $html);
     }
+
 }
